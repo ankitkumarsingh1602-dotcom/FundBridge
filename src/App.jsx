@@ -13,6 +13,7 @@ import {
   ResponsiveContainer, AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, CartesianGrid, Legend
 } from 'recharts';
+import { api } from './services/api';
 
 // ============================================================================
 // 1. UTILITIES & HELPERS
@@ -781,6 +782,26 @@ const AppProvider = ({ children }) => {
 
   // AI Draft transfer state
   const [aiDraft, setAiDraft] = useState(null);
+  // Load live campaigns & groups from MongoDB backend on startup
+  useEffect(() => {
+    const fetchFromBackend = async () => {
+      try {
+        const [campRes, groupRes] = await Promise.all([
+          api.getCampaigns(),
+          api.getGroups(),
+        ]);
+        if (campRes?.campaigns?.length) {
+          setCampaigns(campRes.campaigns.map((c) => ({ ...c, id: c._id })));
+        }
+        if (groupRes?.groups?.length) {
+          setGroups(groupRes.groups.map((g) => ({ ...g, id: g._id })));
+        }
+      } catch (err) {
+        console.warn('Backend offline, using local data:', err.message);
+      }
+    };
+    fetchFromBackend();
+  }, []);
 
   // Sync to localStorage
   useEffect(() => {
