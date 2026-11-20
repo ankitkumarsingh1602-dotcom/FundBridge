@@ -2822,7 +2822,7 @@ const CreateCampaignPage = () => {
         documents: form.supportDocName ? 'Verified' : 'Pending',
         bank: form.bankVerifiedSim ? 'Verified' : 'Not Submitted',
         completeness: 94,
-        transparency: 90,
+        transparency: 'Verified',
       },
       targetAmount: Number(form.targetAmount),
       daysLeft: Number(form.daysLeft),
