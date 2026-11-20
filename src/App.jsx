@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useContext, createContext, useMemo } from 'react';
+import React, { useState, useEffect, useContext, createContext, useMemo } from 'react';
 import {
   Heart, ShieldCheck, Users, Search, ArrowRight, PlusCircle,
   CheckCircle2, Clock, MapPin, Share2, Bookmark, Sparkles,
@@ -28,10 +28,10 @@ const formatINR = (amount) => {
 
 const formatCompactINR = (amount) => {
   const num = Number(amount) || 0;
-  if (num >= 10000000) return `â‚¹${(num / 10000000).toFixed(2)} Cr`;
-  if (num >= 100000) return `â‚¹${(num / 100000).toFixed(2)} L`;
-  if (num >= 1000) return `â‚¹${(num / 1000).toFixed(1)}K`;
-  return `â‚¹${num}`;
+  if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
+  if (num >= 100000) return `₹${(num / 100000).toFixed(2)} L`;
+  if (num >= 1000) return `₹${(num / 1000).toFixed(1)}K`;
+  return `₹${num}`;
 };
 
 const calcPercentage = (raised, target) => {
@@ -184,7 +184,7 @@ const INITIAL_CAMPAIGNS = [
     ],
     updates: [
       { id: 'u_1', date: '2026-11-14', title: 'Pre-op tests cleared! Surgery date locked', content: 'Thanks to 280+ generous donors, Advik has been cleared by the anesthesia team. Surgery is scheduled for November 22.' },
-      { id: 'u_2', date: '2026-11-06', title: 'First hospital deposit paid with receipts uploaded', content: 'We transferred â‚¹1,80,000 directly to the hospital billing desk. Receipt is live in the Fund Utilization tab.' },
+      { id: 'u_2', date: '2026-11-06', title: 'First hospital deposit paid with receipts uploaded', content: 'We transferred ₹1,80,000 directly to the hospital billing desk. Receipt is live in the Fund Utilization tab.' },
     ],
     donors: [
       { id: 'd_1', name: 'Aarav Sharma', amount: 5000, date: '2026-11-15', message: 'Praying for little Advikâ€™s speedy recovery!', anonymous: false },
@@ -208,7 +208,7 @@ const INITIAL_GROUPS = [
     campaignId: 'camp_1',
     campaignTitle: 'Neonatal Heart Surgery for 8-Month-Old Baby Advik',
     targetAmount: 50000,
-    description: '5 batchmates pooling â‚¹10,000 each for direct medical relief!',
+    description: '5 batchmates pooling ₹10,000 each for direct medical relief!',
     members: [
       { id: 'gm_1', name: 'Aarav Sharma', pledged: 10000, contributed: 10000 },
       { id: 'gm_2', name: 'Neha Kulkarni', pledged: 10000, contributed: 10000 },
@@ -242,7 +242,7 @@ const AppProvider = ({ children }) => {
       ...u,
       id,
       avatar:
-        u.avatar ||
+        (u.avatar && !u.avatar.startsWith('http') ? u.avatar : null) ||
         (u.name || 'FB')
           .split(' ')
           .map((n) => n[0])
@@ -438,7 +438,7 @@ const AppProvider = ({ children }) => {
   const makeDonation = async ({ campaignId, amount, anonymous, message, donorNameOverride }) => {
     const cleanAmount = Number(amount);
     if (!cleanAmount || cleanAmount < 10) {
-      showToast('Please enter a valid donation amount (minimum â‚¹10).', 'error');
+      showToast('Please enter a valid donation amount (minimum ₹10).', 'error');
       return false;
     }
 
@@ -1457,7 +1457,7 @@ const QuickDonationModal = ({ campaign, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Or Enter Custom Amount (â‚¹)</label>
+            <label className="block text-xs font-semibold text-slate-600 mb-1">Or Enter Custom Amount (₹)</label>
             <input
               type="number"
               min="10"
@@ -1620,17 +1620,17 @@ const HomePage = () => {
                   </div>
                   <ProgressBar raised={368500} target={450000} />
                   <div className="flex justify-between text-xs text-slate-500 mt-2">
-                    <span>Raised: â‚¹3,68,500</span>
-                    <span>Utilized w/ Receipts: â‚¹2,57,000</span>
+                    <span>Raised: ₹3,68,500</span>
+                    <span>Utilized w/ Receipts: ₹2,57,000</span>
                   </div>
                 </div>
 
                 <div className="space-y-2.5 mb-5">
                   <p className="text-xs font-bold text-slate-500 uppercase">Verified Expense Breakdown</p>
                   {[
-                    { label: 'Hospital Surgery & OT Deposit', amt: 'â‚¹1,80,000', tag: 'Receipt Attached' },
-                    { label: 'Specialized Pediatric Medicines', amt: 'â‚¹42,000', tag: 'Receipt Attached' },
-                    { label: 'Cardiac Echo & Blood Panel', amt: 'â‚¹35,000', tag: 'Receipt Attached' },
+                    { label: 'Hospital Surgery & OT Deposit', amt: '₹1,80,000', tag: 'Receipt Attached' },
+                    { label: 'Specialized Pediatric Medicines', amt: '₹42,000', tag: 'Receipt Attached' },
+                    { label: 'Cardiac Echo & Blood Panel', amt: '₹35,000', tag: 'Receipt Attached' },
                   ].map((row, idx) => (
                     <div
                       key={idx}
@@ -1855,7 +1855,7 @@ const ExplorePage = () => {
               className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
             >
               <option value="popularity">Sort: Most Popular</option>
-              <option value="most_funded">Sort: Most Funded (â‚¹)</option>
+              <option value="most_funded">Sort: Most Funded (₹)</option>
               <option value="ending_soon">Sort: Ending Soon</option>
               <option value="newest">Sort: Newest First</option>
             </select>
@@ -2436,7 +2436,7 @@ const CampaignDetailsPage = () => {
                     <input
                       type="number"
                       min="10"
-                      placeholder="Custom â‚¹"
+                      placeholder="Custom ₹"
                       value={customAmt}
                       onChange={(e) => setCustomAmt(e.target.value)}
                       className="px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
@@ -2510,7 +2510,7 @@ const CampaignDetailsPage = () => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Amount (â‚¹) *</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Amount (₹) *</label>
               <input
                 type="number"
                 required
@@ -2656,7 +2656,7 @@ const AIWriterPage = () => {
             />
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Estimated Funding Goal (â‚¹)</label>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Estimated Funding Goal (₹)</label>
             <input
               type="number"
               value={goal}
@@ -2993,7 +2993,7 @@ const CreateCampaignPage = () => {
             <h2 className="text-xl font-extrabold text-slate-900">Step 3: Funding Target & Milestones</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Total Funding Target (â‚¹)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Total Funding Target (₹)</label>
                 <input
                   type="number"
                   min="1000"
@@ -3636,7 +3636,7 @@ const GroupFundingPage = () => {
                       <div className="flex items-center gap-1.5">
                         <input
                           type="number"
-                          placeholder="â‚¹"
+                          placeholder="₹"
                           value={contribAmounts[mId] || ''}
                           onChange={(e) => setContribAmounts({ ...contribAmounts, [mId]: e.target.value })}
                           className="w-20 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs"
@@ -3649,7 +3649,7 @@ const GroupFundingPage = () => {
                           }}
                           className="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold"
                         >
-                          Add â‚¹
+                          Add ₹
                         </button>
                       </div>
                     </div>
