@@ -5,7 +5,7 @@ import {
   Bell, Menu, X, Eye, EyeOff, ChevronRight, ChevronLeft,
   Send, BarChart3, Lock, Building2, Stethoscope, GraduationCap,
   Rocket, Leaf, Cpu, Siren, HandHeart, PawPrint, Info,
-  RefreshCw, ShieldAlert, Receipt
+  RefreshCw, Receipt
 } from 'lucide-react';
 import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
@@ -16,6 +16,8 @@ import { api } from './services/api';
 // ============================================================================
 // 1. UTILITIES & HELPERS
 // ============================================================================
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 const formatINR = (amount) => {
   const num = Number(amount) || 0;
@@ -78,7 +80,7 @@ const createReceiptSVG = (vendor, amount, date, category) => {
     <rect width="460" height="540" rx="12" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
     <rect x="0" y="0" width="460" height="76" rx="12" fill="#171923"/>
     <text x="24" y="36" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">OFFICIAL TAX INVOICE / RECEIPT</text>
-    <text x="24" y="58" font-family="Inter, sans-serif" font-size="12" fill="#94A3B8">FundBridge Simulated Audit Copy â€¢ GST Verified Vendor</text>
+    <text x="24" y="58" font-family="Inter, sans-serif" font-size="12" fill="#94A3B8">FundBridge Audit Copy • GST Verified Vendor</text>
     <text x="24" y="120" font-family="Inter, sans-serif" font-size="13" fill="#64748B">VENDOR / INSTITUTION</text>
     <text x="24" y="144" font-family="Inter, sans-serif" font-size="18" font-weight="700" fill="#0F172A">${vendor}</text>
     <line x1="24" y1="168" x2="436" y2="168" stroke="#E2E8F0" stroke-dasharray="4 4"/>
@@ -93,7 +95,6 @@ const createReceiptSVG = (vendor, amount, date, category) => {
     <text x="44" y="376" font-family="Inter, sans-serif" font-size="26" font-weight="800" fill="#16A34A">${formatINR(amount)}</text>
     <circle cx="370" cy="352" r="24" fill="#DCFCE7"/>
     <text x="370" y="357" font-family="Inter, sans-serif" font-size="11" font-weight="800" fill="#16A34A" text-anchor="middle">PAID</text>
-    <text x="230" y="455" font-family="Inter, sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle">Simulated Receipt Preview for Transparency Demonstration</text>
     <text x="230" y="478" font-family="Inter, sans-serif" font-size="11" fill="#CBD5E1" text-anchor="middle">Ref ID: FB-TXN-${Math.floor(100000 + (amount % 899999))}</text>
   </svg>`;
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -113,7 +114,7 @@ const INITIAL_USERS = [
     avatar: 'AS',
     joinedDate: '2025-08-14',
     interests: ['Education', 'Medical', 'Environment'],
-    wishlist: ['camp_1', 'camp_3', 'camp_4'],
+    wishlist: ['camp_1'],
   },
   {
     id: 'user_creator_1',
@@ -124,7 +125,7 @@ const INITIAL_USERS = [
     avatar: 'KN',
     joinedDate: '2025-06-02',
     interests: ['Medical', 'Community Development'],
-    wishlist: ['camp_2'],
+    wishlist: [],
   },
   {
     id: 'user_admin_1',
@@ -150,27 +151,19 @@ const INITIAL_CAMPAIGNS = [
     creatorRole: 'Verified Medical Partner',
     status: 'Urgent',
     isEmergency: true,
-    urgencyLabel: 'Critical â€¢ Surgery Scheduled in 6 Days',
+    urgencyLabel: 'Critical • Surgery Scheduled in 6 Days',
     verified: true,
     trustScore: 96,
-    verificationDetails: {
-      identity: 'Verified',
-      documents: 'Verified',
-      bank: 'Verified',
-      completeness: 98,
-      transparency: 95,
-    },
     targetAmount: 450000,
     raisedAmount: 368500,
     supportersCount: 284,
     daysLeft: 6,
     createdAt: '2026-10-28',
     views: 4820,
-    image: createIllustrationSVG('Save Baby Advik', 'Urgent Pediatric Cardiac Surgery â€¢ Bengaluru', '#EF4444', '#991B1B', 'URGENT MEDICAL'),
-    beforeImage: createIllustrationSVG('Diagnosis Stage', 'Pre-Operative ICU Care & Echo Reports', '#64748B', '#334155', 'BEFORE'),
+    image: createIllustrationSVG('Save Baby Advik', 'Urgent Pediatric Cardiac Surgery • Bengaluru', '#EF4444', '#991B1B', 'URGENT MEDICAL'),
     afterImage: createIllustrationSVG('Recovery Milestone', 'Post-Surgery Pediatric Ward Monitoring', '#16A34A', '#15803D', 'TARGET OUTCOME'),
     shortDescription: 'Baby Advik was diagnosed with a complex congenital heart defect. Immediate open-heart surgery at Narayana Pediatric Institute can save his life.',
-    story: 'Advik is the first child of Rajesh (a daily-wage school bus driver) and Sunita. At 6 months, doctors detected a severe Ventricular Septal Defect requiring urgent surgical correction. The family has exhausted all savings and pledged their small jewelry. Every rupee goes directly to the hospital escrow account.',
+    story: 'Advik is the first child of Rajesh (a daily-wage school bus driver) and Sunita. At 6 months, doctors detected a severe Ventricular Septal Defect requiring urgent surgical correction. Every rupee goes directly to the hospital escrow account.',
     beneficiary: 'Advik Kumar (8 months old), son of Rajesh Kumar',
     expenses: [
       { id: 'exp_1', description: 'Hospital Surgery & OT Deposit', amount: 180000, category: 'Hospital Fees', date: '2026-11-05', receiptUrl: createReceiptSVG('Narayana Pediatric Heart Center', 180000, '05 Nov 2026', 'Hospital Fees') },
@@ -183,16 +176,13 @@ const INITIAL_CAMPAIGNS = [
       { id: 'm_3', title: 'Post-Op ICU & 3-Month Medication', target: 120000, deadline: '2026-12-15', status: 'Upcoming', description: '10 days pediatric ICU recovery and follow-up medicines.' },
     ],
     updates: [
-      { id: 'u_1', date: '2026-11-14', title: 'Pre-op tests cleared! Surgery date locked', content: 'Thanks to 280+ generous donors, Advik has been cleared by the anesthesia team. Surgery is scheduled for November 22.' },
-      { id: 'u_2', date: '2026-11-06', title: 'First hospital deposit paid with receipts uploaded', content: 'We transferred ₹1,80,000 directly to the hospital billing desk. Receipt is live in the Fund Utilization tab.' },
+      { id: 'u_1', date: '2026-11-14', title: 'Pre-op tests cleared! Surgery date locked', content: 'Thanks to 280+ generous donors, Advik has been cleared by the anesthesia team.' },
     ],
     donors: [
-      { id: 'd_1', name: 'Aarav Sharma', amount: 5000, date: '2026-11-15', message: 'Praying for little Advikâ€™s speedy recovery!', anonymous: false },
-      { id: 'd_2', name: 'Anonymous', amount: 25000, date: '2026-11-14', message: 'Stay strong parents. God bless.', anonymous: true },
-      { id: 'd_3', name: 'Meera Krishnan', amount: 2500, date: '2026-11-12', message: 'Sending love and strength.', anonymous: false },
+      { id: 'd_1', name: 'Aarav Sharma', amount: 5000, date: '2026-11-15', message: 'Praying for little Advik’s speedy recovery!', anonymous: false },
     ],
     qna: [
-      { id: 'q_1', user: 'Vikramjit Singh', question: 'Is the hospital accepting direct CSR/80G certificates for this case?', answer: 'Yes! All donations routed through our registered Pediatric Care Trust qualify for instant simulated 80G tax receipts.', date: '2026-11-10' },
+      { id: 'q_1', user: 'Vikramjit Singh', question: 'Is the hospital accepting direct CSR/80G certificates?', answer: 'Yes! All donations qualify for 80G receipts.', date: '2026-11-10' },
     ],
   },
 ];
@@ -208,7 +198,7 @@ const INITIAL_GROUPS = [
     campaignId: 'camp_1',
     campaignTitle: 'Neonatal Heart Surgery for 8-Month-Old Baby Advik',
     targetAmount: 50000,
-    description: '5 batchmates pooling ₹10,000 each for direct medical relief!',
+    description: 'Batchmates pooling funds for direct medical relief!',
     members: [
       { id: 'gm_1', name: 'Aarav Sharma', pledged: 10000, contributed: 10000 },
       { id: 'gm_2', name: 'Neha Kulkarni', pledged: 10000, contributed: 10000 },
@@ -217,19 +207,19 @@ const INITIAL_GROUPS = [
 ];
 
 const INITIAL_NOTIFICATIONS = [
-  { id: 'notif_1', title: 'Milestone Completed!', message: 'Baby Advikâ€™s campaign completed Milestone 1: Pre-Operative Diagnostics.', time: '2 hours ago', read: false, type: 'milestone' },
+  { id: 'notif_1', title: 'Milestone Completed!', message: 'Baby Advik’s campaign completed Milestone 1: Pre-Operative Diagnostics.', time: '2 hours ago', read: false, type: 'milestone' },
 ];
 
 // ============================================================================
-// 3. GLOBAL CONTEXT (Real JWT Auth + MongoDB Persistence + Demo Fallback)
+// 3. GLOBAL CONTEXT
 // ============================================================================
 
 const AppContext = createContext(null);
 
 const AppProvider = ({ children }) => {
   const [route, setRoute] = useState({ page: 'home', params: {} });
-
   const [toast, setToast] = useState(null);
+
   const showToast = (message, type = 'success') => {
     setToast({ message, type, id: Date.now() });
     setTimeout(() => setToast(null), 3800);
@@ -243,12 +233,7 @@ const AppProvider = ({ children }) => {
       id,
       avatar:
         (u.avatar && !u.avatar.startsWith('http') ? u.avatar : null) ||
-        (u.name || 'FB')
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .slice(0, 2)
-          .toUpperCase(),
+        (u.name || 'FB').split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase(),
       interests: u.interests || ['Education', 'Medical'],
       wishlist: (u.wishlist || []).map((w) => (typeof w === 'object' ? w._id || w.id : w)),
     };
@@ -311,7 +296,6 @@ const AppProvider = ({ children }) => {
   });
 
   const [aiDraft, setAiDraft] = useState(null);
-
   const hasLiveToken = () => Boolean(localStorage.getItem('fundbridge_token'));
 
   useEffect(() => {
@@ -319,9 +303,7 @@ const AppProvider = ({ children }) => {
       try {
         if (hasLiveToken()) {
           const meRes = await api.getMe();
-          if (meRes?.user) {
-            setCurrentUser(normalizeUser(meRes.user));
-          }
+          if (meRes?.user) setCurrentUser(normalizeUser(meRes.user));
           try {
             const myDonRes = await api.getMyDonations();
             if (myDonRes?.donations) {
@@ -339,10 +321,7 @@ const AppProvider = ({ children }) => {
           } catch (_) {}
         }
 
-        const [campRes, groupRes] = await Promise.all([
-          api.getCampaigns(),
-          api.getGroups(),
-        ]);
+        const [campRes, groupRes] = await Promise.all([api.getCampaigns(), api.getGroups()]);
         if (campRes?.campaigns?.length) {
           setCampaigns(campRes.campaigns.map((c) => ({ ...c, id: c._id })));
         }
@@ -351,10 +330,6 @@ const AppProvider = ({ children }) => {
         }
       } catch (err) {
         console.warn('Backend sync warning:', err.message);
-        if (err.message?.toLowerCase().includes('token') || err.message?.toLowerCase().includes('authorized')) {
-          localStorage.removeItem('fundbridge_token');
-          setCurrentUser(null);
-        }
       }
     };
     fetchFromBackend();
@@ -364,27 +339,23 @@ const AppProvider = ({ children }) => {
     try {
       if (currentUser) localStorage.setItem('fb_current_user', JSON.stringify(currentUser));
       else localStorage.removeItem('fb_current_user');
-    } catch (e) { console.error(e); }
+    } catch (_) {}
   }, [currentUser]);
 
   useEffect(() => {
-    try { localStorage.setItem('fb_users', JSON.stringify(users)); } catch (e) { console.error(e); }
-  }, [users]);
-
-  useEffect(() => {
-    try { localStorage.setItem('fb_campaigns', JSON.stringify(campaigns)); } catch (e) { console.error(e); }
+    try { localStorage.setItem('fb_campaigns', JSON.stringify(campaigns)); } catch (_) {}
   }, [campaigns]);
 
   useEffect(() => {
-    try { localStorage.setItem('fb_donations', JSON.stringify(donations)); } catch (e) { console.error(e); }
+    try { localStorage.setItem('fb_donations', JSON.stringify(donations)); } catch (_) {}
   }, [donations]);
 
   useEffect(() => {
-    try { localStorage.setItem('fb_groups', JSON.stringify(groups)); } catch (e) { console.error(e); }
+    try { localStorage.setItem('fb_groups', JSON.stringify(groups)); } catch (_) {}
   }, [groups]);
 
   useEffect(() => {
-    try { localStorage.setItem('fb_notifications', JSON.stringify(notifications)); } catch (e) { console.error(e); }
+    try { localStorage.setItem('fb_notifications', JSON.stringify(notifications)); } catch (_) {}
   }, [notifications]);
 
   const navigate = (page, params = {}) => {
@@ -416,7 +387,7 @@ const AppProvider = ({ children }) => {
 
   const toggleWishlist = async (campaignId) => {
     if (!currentUser) {
-      showToast('Please log in to save campaigns to your wishlist.', 'warning');
+      showToast('Please log in to save campaigns.', 'warning');
       navigate('login');
       return;
     }
@@ -435,31 +406,79 @@ const AppProvider = ({ children }) => {
     }
   };
 
-  const makeDonation = async ({ campaignId, amount, anonymous, message, donorNameOverride }) => {
+  const processGatewayPayment = async ({
+    campaignId,
+    amount,
+    paymentMethod,
+    paymentDetail,
+    anonymous,
+    message,
+    donorNameOverride,
+  }) => {
     const cleanAmount = Number(amount);
     if (!cleanAmount || cleanAmount < 10) {
-      showToast('Please enter a valid donation amount (minimum ₹10).', 'error');
-      return false;
+      throw new Error('Minimum donation amount is ₹10.');
     }
 
     const targetCamp = campaigns.find((c) => c.id === campaignId);
-    if (!targetCamp) return false;
+    if (!targetCamp) throw new Error('Campaign not found.');
 
     const donorDisplay = anonymous
-      ? 'Anonymous'
+      ? 'Anonymous Supporter'
       : donorNameOverride || currentUser?.name || 'Guest Supporter';
 
-    if (hasLiveToken() && campaignId.length === 24) {
-      try {
-        await api.donate({
+    let receiptData = {
+      transactionRef: `TXN-FB-${Math.random().toString(36).substring(2, 10).toUpperCase()}`,
+      orderId: `ORD-FB-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+      amount: cleanAmount,
+      paymentMethod,
+      donorName: donorDisplay,
+      campaignTitle: targetCamp.title,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (campaignId.length === 24) {
+      const token = localStorage.getItem('fundbridge_token');
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      };
+
+      const orderRes = await fetch(`${API_BASE}/api/payments/create-order`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ amount: cleanAmount, campaignId }),
+      });
+      const orderJson = await orderRes.json();
+      if (!orderRes.ok || !orderJson.success) {
+        throw new Error(orderJson.message || 'Failed to create payment order.');
+      }
+
+      await new Promise((r) => setTimeout(r, 1200));
+
+      const verifyRes = await fetch(`${API_BASE}/api/payments/verify`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          orderId: orderJson.order.id,
           campaignId,
           amount: cleanAmount,
-          anonymous: !!anonymous,
+          paymentMethod,
+          paymentDetail,
+          isAnonymous: Boolean(anonymous),
           message: message || 'Happy to support this meaningful cause!',
-        });
-      } catch (err) {
-        showToast(err.message || 'Donation failed on server.', 'error');
-        return false;
+          donorName: donorDisplay,
+        }),
+      });
+      const verifyJson = await verifyRes.json();
+      if (!verifyRes.ok || !verifyJson.success) {
+        throw new Error(verifyJson.message || 'Payment verification failed.');
+      }
+      receiptData = verifyJson.receipt;
+    } else {
+      await new Promise((r) => setTimeout(r, 1000));
+      if (paymentDetail && paymentDetail.toLowerCase().includes('fail')) {
+        throw new Error('Payment declined by bank (Simulated Test Failure).');
       }
     }
 
@@ -469,7 +488,7 @@ const AppProvider = ({ children }) => {
       amount: cleanAmount,
       date: new Date().toISOString().split('T')[0],
       message: message || 'Happy to support this meaningful cause!',
-      anonymous: !!anonymous,
+      anonymous: Boolean(anonymous),
     };
 
     setCampaigns((prev) =>
@@ -496,17 +515,19 @@ const AppProvider = ({ children }) => {
       amount: cleanAmount,
       date: new Date().toISOString().split('T')[0],
       status: 'Completed',
-      anonymous: !!anonymous,
+      anonymous: Boolean(anonymous),
+      transactionRef: receiptData.transactionRef,
     };
 
     setDonations((prev) => [newDonationRecord, ...prev]);
     pushNotification(
-      'Donation Confirmed!',
-      `You contributed ${formatINR(cleanAmount)} to "${targetCamp.title}".`,
+      'Payment Verified!',
+      `Paid ${formatINR(cleanAmount)} via ${paymentMethod} (${receiptData.transactionRef}) to "${targetCamp.title}".`,
       'success'
     );
-    showToast(`Thank you! Your ${formatINR(cleanAmount)} contribution was recorded.`);
-    return true;
+    showToast(`Payment of ${formatINR(cleanAmount)} verified!`);
+
+    return receiptData;
   };
 
   const addCampaign = async (newCampData) => {
@@ -516,12 +537,11 @@ const AppProvider = ({ children }) => {
         if (res?.campaign) {
           const savedCamp = { ...res.campaign, id: res.campaign._id };
           setCampaigns((prev) => [savedCamp, ...prev]);
-          pushNotification('Campaign Submitted & Live', `"${savedCamp.title}" saved to MongoDB.`, 'success');
           showToast('Campaign published to MongoDB!');
           return savedCamp;
         }
       } catch (err) {
-        showToast(err.message || 'Failed to create campaign on server.', 'error');
+        showToast(err.message || 'Failed to create campaign.', 'error');
         return null;
       }
     }
@@ -542,20 +562,18 @@ const AppProvider = ({ children }) => {
           id: generateId('upd'),
           date: new Date().toISOString().split('T')[0],
           title: 'Campaign Published on FundBridge',
-          content: 'Thank you for visiting our campaign! All fund utilization logs and receipts will be uploaded transparently here.',
+          content: 'All fund utilization logs and receipts will be uploaded transparently here.',
         },
       ],
       qna: [],
     };
     setCampaigns((prev) => [newCampaign, ...prev]);
-    showToast('Campaign published locally (Demo Mode)!');
+    showToast('Campaign published locally!');
     return newCampaign;
   };
 
   const updateCampaign = async (campaignId, updates) => {
-    setCampaigns((prev) =>
-      prev.map((c) => (c.id === campaignId ? { ...c, ...updates } : c))
-    );
+    setCampaigns((prev) => prev.map((c) => (c.id === campaignId ? { ...c, ...updates } : c)));
     if (hasLiveToken() && campaignId.length === 24) {
       try { await api.updateCampaign(campaignId, updates); } catch (err) { showToast(err.message, 'error'); }
     }
@@ -563,12 +581,7 @@ const AppProvider = ({ children }) => {
 
   const deleteCampaign = async (campaignId) => {
     if (hasLiveToken() && campaignId.length === 24) {
-      try {
-        await api.deleteCampaign(campaignId);
-      } catch (err) {
-        showToast(err.message || 'Not authorized to delete this campaign.', 'error');
-        return;
-      }
+      try { await api.deleteCampaign(campaignId); } catch (err) { showToast(err.message, 'error'); return; }
     }
     setCampaigns((prev) => prev.filter((c) => c.id !== campaignId));
     showToast('Campaign deleted.', 'warning');
@@ -589,12 +602,9 @@ const AppProvider = ({ children }) => {
     }
     const newExp = { id: generateId('exp'), ...payload };
     setCampaigns((prev) =>
-      prev.map((c) =>
-        c.id === campaignId ? { ...c, expenses: [newExp, ...(c.expenses || [])] } : c
-      )
+      prev.map((c) => (c.id === campaignId ? { ...c, expenses: [newExp, ...(c.expenses || [])] } : c))
     );
-    pushNotification('Expense Log Added', `New expense of ${formatINR(newExp.amount)} logged with receipt.`, 'transparency');
-    showToast('Expense and receipt added to Fund Utilization Tracker!');
+    showToast('Expense and receipt added!');
   };
 
   const updateMilestoneStatus = async (campaignId, milestoneId, status) => {
@@ -610,8 +620,7 @@ const AppProvider = ({ children }) => {
         };
       })
     );
-    pushNotification('Milestone Updated', `Milestone marked as ${status}.`, 'milestone');
-    showToast(`Milestone status updated to ${status}`);
+    showToast(`Milestone updated to ${status}`);
   };
 
   const addCampaignUpdate = async (campaignId, title, content) => {
@@ -647,7 +656,7 @@ const AppProvider = ({ children }) => {
     setCampaigns((prev) =>
       prev.map((c) => (c.id === campaignId ? { ...c, qna: [q, ...(c.qna || [])] } : c))
     );
-    showToast('Question posted to campaign creator!');
+    showToast('Question posted!');
   };
 
   const replyCampaignQuestion = async (campaignId, qnaId, answerText) => {
@@ -674,7 +683,7 @@ const AppProvider = ({ children }) => {
         const res = await api.createGroup(groupData);
         if (res?.group) {
           setGroups((prev) => [{ ...res.group, id: res.group._id }, ...prev]);
-          showToast('Shared Funding Group saved to MongoDB!');
+          showToast('Shared Funding Group created!');
           return;
         }
       } catch (err) {
@@ -682,8 +691,7 @@ const AppProvider = ({ children }) => {
         return;
       }
     }
-    const newGrp = { id: generateId('grp'), ...groupData };
-    setGroups((prev) => [newGrp, ...prev]);
+    setGroups((prev) => [{ id: generateId('grp'), ...groupData }, ...prev]);
     showToast('Shared Funding Group created!');
   };
 
@@ -710,9 +718,11 @@ const AppProvider = ({ children }) => {
     );
 
     if (targetCampId) {
-      makeDonation({
+      await processGatewayPayment({
         campaignId: targetCampId,
         amount: cleanAmt,
+        paymentMethod: 'UPI',
+        paymentDetail: 'group@upi',
         anonymous: false,
         message: 'Contributed via FundBridge Group Giving Circle',
       });
@@ -754,18 +764,12 @@ const AppProvider = ({ children }) => {
 
   const signupUser = async ({ name, email, phone, password, role }) => {
     try {
-      const res = await api.register({
-        name,
-        email,
-        phone,
-        password,
-        role: role || 'donor',
-      });
+      const res = await api.register({ name, email, phone, password, role: role || 'donor' });
       if (res?.token && res?.user) {
         localStorage.setItem('fundbridge_token', res.token);
         const userObj = normalizeUser(res.user);
         setCurrentUser(userObj);
-        showToast(`Account created in MongoDB! Welcome, ${userObj.name}.`);
+        showToast(`Account created! Welcome, ${userObj.name}.`);
         navigate(userObj.role === 'creator' ? 'creator-dashboard' : 'donor-dashboard');
         return true;
       }
@@ -812,7 +816,7 @@ const AppProvider = ({ children }) => {
         setAiDraft,
         markAllNotificationsRead,
         toggleWishlist,
-        makeDonation,
+        processGatewayPayment,
         addCampaign,
         updateCampaign,
         deleteCampaign,
@@ -863,12 +867,9 @@ const TrustBadge = ({ verified, score, compact = false }) => {
     );
   }
   return (
-    <span
-      title="Verification & Trust Score"
-      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
-    >
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
       <ShieldCheck className="w-3.5 h-3.5 text-[#16A34A]" />
-      {compact ? `Trust ${score}/100` : `Verified â€¢ Trust ${score}/100`}
+      {compact ? `Trust ${score}/100` : `Verified • Trust ${score}/100`}
     </span>
   );
 };
@@ -958,9 +959,7 @@ const CampaignCard = ({ campaign, onQuickDonate }) => {
             </span>
             <span className="flex items-center gap-1 font-medium">
               <Clock className="w-3.5 h-3.5 text-slate-400" />
-              {campaign.status === 'Completed'
-                ? 'Goal Reached'
-                : `${campaign.daysLeft} days left`}
+              {campaign.status === 'Completed' ? 'Goal Reached' : `${campaign.daysLeft} days left`}
             </span>
           </div>
 
@@ -1042,18 +1041,13 @@ const Navbar = () => {
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div
-            onClick={() => navigate('home')}
-            className="flex items-center gap-2.5 cursor-pointer shrink-0"
-          >
+          <div onClick={() => navigate('home')} className="flex items-center gap-2.5 cursor-pointer shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#635BFF] to-[#4338CA] flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
               <HandHeart className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-xl font-extrabold tracking-tight text-[#171923]">
-                Fund<span className="text-[#635BFF]">Bridge</span>
-              </span>
-            </div>
+            <span className="text-xl font-extrabold tracking-tight text-[#171923]">
+              Fund<span className="text-[#635BFF]">Bridge</span>
+            </span>
           </div>
 
           <nav className="hidden xl:flex items-center gap-1">
@@ -1070,9 +1064,7 @@ const Navbar = () => {
                   }`}
                 >
                   {link.label}
-                  {link.badge && (
-                    <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
-                  )}
+                  {link.badge && <span className="w-2 h-2 rounded-full bg-[#EF4444]" />}
                 </button>
               );
             })}
@@ -1122,10 +1114,7 @@ const Navbar = () => {
                       <p className="p-4 text-sm text-slate-500 text-center">No notifications yet.</p>
                     ) : (
                       notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          className={`px-4 py-3 text-sm ${n.read ? 'bg-white' : 'bg-indigo-50/40'}`}
-                        >
+                        <div key={n.id} className={`px-4 py-3 text-sm ${n.read ? 'bg-white' : 'bg-indigo-50/40'}`}>
                           <div className="flex justify-between items-start gap-2">
                             <p className="font-semibold text-slate-900">{n.title}</p>
                             <span className="text-[11px] text-slate-400 shrink-0">{n.time}</span>
@@ -1266,37 +1255,13 @@ const Navbar = () => {
                 setMobileOpen(false);
               }}
               className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold flex items-center justify-between ${
-                route.page === link.id
-                  ? 'bg-indigo-50 text-[#635BFF]'
-                  : 'text-slate-700 hover:bg-slate-50'
+                route.page === link.id ? 'bg-indigo-50 text-[#635BFF]' : 'text-slate-700 hover:bg-slate-50'
               }`}
             >
               <span>{link.label}</span>
               {link.badge && <span className="px-2 py-0.5 text-[10px] bg-red-100 text-red-600 rounded-full">LIVE</span>}
             </button>
           ))}
-          <div className="pt-3 border-t border-slate-100 grid grid-cols-2 gap-2">
-            {currentUser?.role !== 'donor' && (
-              <button
-                onClick={() => { navigate('create-campaign'); setMobileOpen(false); }}
-                className="col-span-2 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-semibold text-center"
-              >
-                + Start a Campaign
-              </button>
-            )}
-            <button
-              onClick={() => { navigate('donor-dashboard'); setMobileOpen(false); }}
-              className="py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-semibold"
-            >
-              Donor Dashboard
-            </button>
-            <button
-              onClick={() => { navigate('creator-dashboard'); setMobileOpen(false); }}
-              className="py-2 rounded-xl bg-slate-100 text-slate-800 text-xs font-semibold"
-            >
-              Creator Dashboard
-            </button>
-          </div>
         </div>
       )}
     </header>
@@ -1323,7 +1288,7 @@ const Footer = () => {
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 text-xs text-slate-300">
               <Info className="w-3.5 h-3.5 text-[#635BFF]" />
-              Connected to MongoDB & Render API
+              FundBridge Pay • MongoDB Connected
             </div>
           </div>
 
@@ -1351,7 +1316,7 @@ const Footer = () => {
           <div>
             <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-4">Transparency Guarantee</h4>
             <p className="text-sm text-slate-400 mb-4">
-              Every campaign features itemized expense logs, receipt previews, and milestone tracking so you know how every rupee creates change.
+              Every campaign features itemized expense logs, receipt previews, and milestone tracking.
             </p>
             <button
               onClick={resetDemoData}
@@ -1363,7 +1328,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-slate-800 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>Â© {new Date().getFullYear()} FundBridge Social Impact Technologies. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} FundBridge Social Impact Technologies. All rights reserved.</p>
           <p>React + Express + MongoDB Atlas</p>
         </div>
       </div>
@@ -1372,71 +1337,159 @@ const Footer = () => {
 };
 
 // ============================================================================
-// 6. QUICK DONATION MODAL
+// 6. FUNDBRIDGE PAY GATEWAY MODAL (UPI / CARD / NETBANKING + RECEIPT)
 // ============================================================================
 
-const QuickDonationModal = ({ campaign, onClose }) => {
-  const { makeDonation, currentUser } = useApp();
-  const [amount, setAmount] = useState(1000);
+const QuickDonationModal = ({
+  campaign,
+  onClose,
+  initialAmount = 1000,
+  initialMessage = '',
+  initialAnonymous = false,
+}) => {
+  const { processGatewayPayment, currentUser } = useApp();
+  const [amount, setAmount] = useState(initialAmount);
   const [customAmount, setCustomAmount] = useState('');
-  const [anonymous, setAnonymous] = useState(false);
-  const [message, setMessage] = useState('');
-  const [confirmed, setConfirmed] = useState(false);
+  const [anonymous, setAnonymous] = useState(initialAnonymous);
+  const [message, setMessage] = useState(initialMessage);
+  const [donorName, setDonorName] = useState(currentUser?.name || '');
+
+  const [payMethod, setPayMethod] = useState('UPI');
+  const [upiId, setUpiId] = useState('ankit@okicici');
+  const [cardNumber, setCardNumber] = useState('4532 •••• •••• 8890');
+  const [expiry, setExpiry] = useState('09/29');
+  const [cvv, setCvv] = useState('742');
+  const [bankName, setBankName] = useState('State Bank of India');
+
+  const [step, setStep] = useState('FORM'); // FORM | PROCESSING | RECEIPT
+  const [errorMsg, setErrorMsg] = useState('');
+  const [receipt, setReceipt] = useState(null);
+
+  useEffect(() => {
+    if (campaign) {
+      setAmount(initialAmount || 1000);
+      setCustomAmount('');
+      setMessage(initialMessage || '');
+      setAnonymous(Boolean(initialAnonymous));
+      setDonorName(currentUser?.name || '');
+      setStep('FORM');
+      setErrorMsg('');
+      setReceipt(null);
+    }
+  }, [campaign, initialAmount, initialMessage, initialAnonymous, currentUser]);
 
   if (!campaign) return null;
 
   const finalAmount = customAmount ? Number(customAmount) : amount;
 
-  const handleConfirm = async (e) => {
+  const handlePaySubmit = async (e) => {
     e.preventDefault();
-    const ok = await makeDonation({
-      campaignId: campaign.id,
-      amount: finalAmount,
-      anonymous,
-      message,
-      donorNameOverride: currentUser?.name,
-    });
-    if (ok) {
-      setConfirmed(true);
+    setStep('PROCESSING');
+    setErrorMsg('');
+    try {
+      const detail =
+        payMethod === 'UPI' ? upiId : payMethod === 'CARD' ? cardNumber : bankName;
+      const txnReceipt = await processGatewayPayment({
+        campaignId: campaign.id,
+        amount: finalAmount,
+        paymentMethod: payMethod,
+        paymentDetail: detail,
+        anonymous,
+        message,
+        donorNameOverride: donorName.trim() || currentUser?.name,
+      });
+      setReceipt(txnReceipt);
+      setStep('RECEIPT');
+    } catch (err) {
+      setErrorMsg(err.message || 'Transaction failed. Please try again.');
+      setStep('FORM');
     }
   };
 
   return (
-    <Modal isOpen={!!campaign} onClose={onClose} title={confirmed ? 'Contribution Recorded!' : 'Support This Campaign'}>
-      {confirmed ? (
-        <div className="text-center py-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#16A34A] flex items-center justify-center mx-auto mb-4">
+    <Modal
+      isOpen={!!campaign}
+      onClose={onClose}
+      title={step === 'RECEIPT' ? 'Payment Receipt • FundBridge Pay' : 'FundBridge Pay • Secure Checkout'}
+    >
+      {step === 'PROCESSING' && (
+        <div className="text-center py-10 space-y-4">
+          <div className="w-14 h-14 rounded-full border-4 border-indigo-100 border-t-[#635BFF] animate-spin mx-auto" />
+          <h4 className="text-lg font-extrabold text-slate-900">Authorizing Payment...</h4>
+          <p className="text-xs text-slate-500">
+            Connecting securely via {payMethod === 'UPI' ? 'UPI Switch' : payMethod === 'CARD' ? 'Card Gateway' : bankName}
+          </p>
+        </div>
+      )}
+
+      {step === 'RECEIPT' && receipt && (
+        <div className="text-center py-2 space-y-4">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#16A34A] flex items-center justify-center mx-auto">
             <CheckCircle2 className="w-9 h-9" />
           </div>
-          <h4 className="text-xl font-extrabold text-slate-900 mb-2">
-            Thank You for Your {formatINR(finalAmount)} Impact!
-          </h4>
-          <p className="text-sm text-slate-600 mb-6">
-            Your contribution to <strong>{campaign.title}</strong> has been recorded.
-          </p>
+          <div>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-[#16A34A] uppercase">
+              PAYMENT CONFIRMED
+            </span>
+            <h4 className="text-2xl font-black text-slate-900 mt-1">{formatINR(receipt.amount)}</h4>
+            <p className="text-xs text-slate-500 mt-0.5">Paid to {receipt.campaignTitle}</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#F8F9FC] border border-slate-200 text-left space-y-2 text-xs">
+            <div className="flex justify-between">
+              <span className="text-slate-500">Transaction Ref</span>
+              <code className="font-bold text-slate-900">{receipt.transactionRef}</code>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Order ID</span>
+              <code className="font-semibold text-slate-700">{receipt.orderId}</code>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Payment Mode</span>
+              <strong className="text-slate-900">{receipt.paymentMethod}</strong>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-slate-500">Donor</span>
+              <strong className="text-slate-900">{receipt.donorName}</strong>
+            </div>
+          </div>
+
           <button
             onClick={onClose}
             className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm hover:bg-[#5249F5]"
           >
-            Done
+            Done & Return to Campaign
           </button>
         </div>
-      ) : (
-        <form onSubmit={handleConfirm} className="space-y-4">
+      )}
+
+      {step === 'FORM' && (
+        <form onSubmit={handlePaySubmit} className="space-y-4">
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
             <div className="pr-3">
-              <p className="text-xs font-semibold text-[#635BFF]">{campaign.category}</p>
-              <p className="text-sm font-bold text-slate-900 line-clamp-1">{campaign.title}</p>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                SANDBOX GATEWAY
+              </span>
+              <p className="text-sm font-bold text-slate-900 line-clamp-1 mt-1">{campaign.title}</p>
             </div>
-            <TrustBadge verified={campaign.verified} score={campaign.trustScore} compact />
+            <div className="text-right shrink-0">
+              <span className="text-[11px] text-slate-500 block">Payable</span>
+              <strong className="text-base font-black text-[#635BFF]">{formatINR(finalAmount)}</strong>
+            </div>
           </div>
 
+          {errorMsg && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700">
+              {errorMsg}
+            </div>
+          )}
+
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-              Select Contribution Amount (INR)
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+              Contribution Amount (INR)
             </label>
-            <div className="grid grid-cols-3 gap-2">
-              {[100, 500, 1000, 2500, 5000, 10000].map((preset) => (
+            <div className="grid grid-cols-4 gap-1.5 mb-2">
+              {[500, 1000, 2500, 5000].map((preset) => (
                 <button
                   type="button"
                   key={preset}
@@ -1444,7 +1497,7 @@ const QuickDonationModal = ({ campaign, onClose }) => {
                     setAmount(preset);
                     setCustomAmount('');
                   }}
-                  className={`py-2.5 rounded-xl text-sm font-bold border transition ${
+                  className={`py-2 rounded-xl text-xs font-bold border transition ${
                     !customAmount && amount === preset
                       ? 'bg-[#635BFF] text-white border-[#635BFF]'
                       : 'bg-white text-slate-700 border-slate-200 hover:border-[#635BFF]'
@@ -1454,46 +1507,148 @@ const QuickDonationModal = ({ campaign, onClose }) => {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Or Enter Custom Amount (₹)</label>
             <input
               type="number"
               min="10"
-              placeholder="e.g., 1500"
+              placeholder="Or enter custom amount (₹)"
               value={customAmount}
               onChange={(e) => setCustomAmount(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Words of Encouragement (Optional)</label>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+              Select Payment Method
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: 'UPI', label: 'UPI / QR' },
+                { id: 'CARD', label: 'Card' },
+                { id: 'NETBANKING', label: 'Net Banking' },
+              ].map((m) => (
+                <button
+                  type="button"
+                  key={m.id}
+                  onClick={() => setPayMethod(m.id)}
+                  className={`py-2 rounded-xl text-xs font-bold border transition ${
+                    payMethod === m.id
+                      ? 'bg-indigo-50 text-[#635BFF] border-[#635BFF]'
+                      : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {payMethod === 'UPI' && (
+            <div className="p-3.5 rounded-xl bg-[#F8F9FC] border border-slate-200 space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700">Enter UPI ID</label>
+              <input
+                type="text"
+                required
+                value={upiId}
+                onChange={(e) => setUpiId(e.target.value)}
+                placeholder="username@okicici"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"
+              />
+              <p className="text-[11px] text-slate-500">
+                Enter any UPI ID to approve, or <code>fail@upi</code> to simulate a bank decline.
+              </p>
+            </div>
+          )}
+
+          {payMethod === 'CARD' && (
+            <div className="p-3.5 rounded-xl bg-[#F8F9FC] border border-slate-200 space-y-2.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Card Number</label>
+                <input
+                  type="text"
+                  required
+                  value={cardNumber}
+                  onChange={(e) => setCardNumber(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Expiry</label>
+                  <input
+                    type="text"
+                    required
+                    value={expiry}
+                    onChange={(e) => setExpiry(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 mb-1">CVV</label>
+                  <input
+                    type="password"
+                    required
+                    maxLength={3}
+                    value={cvv}
+                    onChange={(e) => setCvv(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {payMethod === 'NETBANKING' && (
+            <div className="p-3.5 rounded-xl bg-[#F8F9FC] border border-slate-200 space-y-1.5">
+              <label className="block text-xs font-bold text-slate-700">Select Bank</label>
+              <select
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm"
+              >
+                <option>State Bank of India</option>
+                <option>HDFC Bank</option>
+                <option>ICICI Bank</option>
+                <option>Axis Bank</option>
+                <option>Kotak Mahindra Bank</option>
+              </select>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-2">
             <input
               type="text"
-              placeholder="Share a supportive message..."
+              disabled={anonymous}
+              placeholder="Your Name"
+              value={anonymous ? 'Anonymous' : donorName}
+              onChange={(e) => setDonorName(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-slate-200 text-xs"
+            />
+            <input
+              type="text"
+              placeholder="Note (Optional)"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+              className="px-3 py-2 rounded-xl border border-slate-200 text-xs"
             />
           </div>
 
-          <label className="flex items-center gap-2.5 cursor-pointer select-none">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={anonymous}
               onChange={(e) => setAnonymous(e.target.checked)}
-              className="w-4 h-4 rounded text-[#635BFF] focus:ring-[#635BFF]"
+              className="w-4 h-4 rounded text-[#635BFF]"
             />
-            <span className="text-sm text-slate-700">Make my donation anonymous on the public donor wall</span>
+            <span className="text-xs text-slate-700">Donate anonymously</span>
           </label>
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-[#635BFF] hover:bg-[#5249F5] text-white font-bold text-sm shadow-lg shadow-indigo-500/20 transition"
+            className="w-full py-3 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2"
           >
-            Confirm Donation of {formatINR(finalAmount)}
+            <Lock className="w-4 h-4" />
+            Pay {formatINR(finalAmount)} Securely
           </button>
         </form>
       )}
@@ -1521,7 +1676,7 @@ const HomePage = () => {
   const recommendedCampaigns = useMemo(() => {
     const interests = currentUser?.interests || ['Education', 'Medical'];
     const saved = currentUser?.wishlist || [];
-    const scored = campaigns
+    return campaigns
       .filter((c) => c.status !== 'Completed')
       .map((c) => {
         let score = c.trustScore;
@@ -1530,8 +1685,8 @@ const HomePage = () => {
         if (c.isEmergency) score += 10;
         return { ...c, recScore: score };
       })
-      .sort((a, b) => b.recScore - a.recScore);
-    return scored.slice(0, 3);
+      .sort((a, b) => b.recScore - a.recScore)
+      .slice(0, 3);
   }, [campaigns, currentUser]);
 
   const featuredCampaigns = useMemo(
@@ -1547,7 +1702,7 @@ const HomePage = () => {
             <div className="lg:col-span-7 space-y-6">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-[#635BFF] text-xs font-bold">
                 <ShieldCheck className="w-4 h-4" />
-                TRUST â€¢ RECEIPT TRANSPARENCY â€¢ MILESTONE IMPACT
+                TRUST • RECEIPT TRANSPARENCY • MILESTONE IMPACT
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#171923] tracking-tight leading-[1.1]">
@@ -1558,7 +1713,7 @@ const HomePage = () => {
               </h1>
 
               <p className="text-lg text-slate-600 max-w-2xl leading-relaxed">
-                Discover meaningful causes, support innovative ideas, and help people turn their dreams into realityâ€”with live expense tracking, receipt previews, and milestone accountability.
+                Discover meaningful causes, support innovative ideas, and help people turn their dreams into reality—with live expense tracking, receipt previews, and milestone accountability.
               </p>
 
               <div className="flex flex-wrap gap-3.5 pt-2">
@@ -1580,9 +1735,7 @@ const HomePage = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-slate-200/80">
                 <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-[#171923]">
-                    {formatCompactINR(totalRaised)}
-                  </p>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#171923]">{formatCompactINR(totalRaised)}</p>
                   <p className="text-xs font-medium text-slate-500 mt-0.5">Total Funds Raised</p>
                 </div>
                 <div>
@@ -1590,9 +1743,7 @@ const HomePage = () => {
                   <p className="text-xs font-medium text-slate-500 mt-0.5">Successful Campaigns</p>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold text-[#635BFF]">
-                    {totalSupporters.toLocaleString('en-IN')}+
-                  </p>
+                  <p className="text-2xl sm:text-3xl font-extrabold text-[#635BFF]">{totalSupporters.toLocaleString('en-IN')}+</p>
                   <p className="text-xs font-medium text-slate-500 mt-0.5">Active Donors</p>
                 </div>
                 <div>
@@ -1605,9 +1756,7 @@ const HomePage = () => {
             <div className="lg:col-span-5">
               <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-200/80 relative">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Live Transparency Ledger
-                  </span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Live Transparency Ledger</span>
                   <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-[#16A34A] flex items-center gap-1">
                     <ShieldCheck className="w-3.5 h-3.5" /> Trust Score 96/100
                   </span>
@@ -1623,29 +1772,6 @@ const HomePage = () => {
                     <span>Raised: ₹3,68,500</span>
                     <span>Utilized w/ Receipts: ₹2,57,000</span>
                   </div>
-                </div>
-
-                <div className="space-y-2.5 mb-5">
-                  <p className="text-xs font-bold text-slate-500 uppercase">Verified Expense Breakdown</p>
-                  {[
-                    { label: 'Hospital Surgery & OT Deposit', amt: '₹1,80,000', tag: 'Receipt Attached' },
-                    { label: 'Specialized Pediatric Medicines', amt: '₹42,000', tag: 'Receipt Attached' },
-                    { label: 'Cardiac Echo & Blood Panel', amt: '₹35,000', tag: 'Receipt Attached' },
-                  ].map((row, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-100 shadow-xs text-xs"
-                    >
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="w-4 h-4 text-[#16A34A] shrink-0" />
-                        <span className="font-semibold text-slate-800">{row.label}</span>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-bold text-slate-900 block">{row.amt}</span>
-                        <span className="text-[10px] text-[#635BFF] font-medium">{row.tag}</span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
 
                 <button
@@ -1666,14 +1792,9 @@ const HomePage = () => {
             <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#635BFF] uppercase tracking-wider mb-1">
               <Sparkles className="w-4 h-4" /> Smart Recommendations For You
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#171923]">
-              Matched to Your Impact Interests
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#171923]">Matched to Your Impact Interests</h2>
           </div>
-          <button
-            onClick={() => navigate('explore')}
-            className="text-sm font-bold text-[#635BFF] hover:underline flex items-center gap-1"
-          >
+          <button onClick={() => navigate('explore')} className="text-sm font-bold text-[#635BFF] hover:underline flex items-center gap-1">
             View all campaigns <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -1688,9 +1809,6 @@ const HomePage = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-[#171923]">Explore by Category</h2>
-          <p className="text-slate-600 text-sm mt-2">
-            Support verified individuals, grassroots nonprofits, student innovators, and urgent medical recoveries across 9 dedicated sectors.
-          </p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
@@ -1719,14 +1837,7 @@ const HomePage = () => {
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-[#16A34A]">
-              High Trust Score Campaigns
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#171923] mt-1">
-              Featured Verified Fundraisers
-            </h2>
-          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-[#171923]">Featured Verified Fundraisers</h2>
           <button
             onClick={() => navigate('explore')}
             className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-800 hover:border-[#635BFF]"
@@ -1762,9 +1873,7 @@ const ExplorePage = () => {
   const [quickDonateCamp, setQuickDonateCamp] = useState(null);
 
   useEffect(() => {
-    if (route.params?.category) {
-      setSelectedCategory(route.params.category);
-    }
+    if (route.params?.category) setSelectedCategory(route.params.category);
   }, [route.params]);
 
   const locations = useMemo(() => {
@@ -1802,9 +1911,6 @@ const ExplorePage = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
       <div className="mb-8">
         <h1 className="text-3xl font-extrabold text-[#171923]">Explore Verified Campaigns</h1>
-        <p className="text-slate-600 text-sm mt-1">
-          Filter by category, state, verification status, or urgency to support causes that matter to you.
-        </p>
       </div>
 
       <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm mb-8 space-y-4">
@@ -1824,12 +1930,10 @@ const ExplorePage = () => {
             <select
               value={selectedLocation}
               onChange={(e) => setSelectedLocation(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
             >
               {locations.map((loc) => (
-                <option key={loc} value={loc}>
-                  {loc === 'All' ? 'All Locations' : loc}
-                </option>
+                <option key={loc} value={loc}>{loc === 'All' ? 'All Locations' : loc}</option>
               ))}
             </select>
           </div>
@@ -1838,7 +1942,7 @@ const ExplorePage = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
             >
               <option value="All">All Statuses</option>
               <option value="Active">Active</option>
@@ -1852,7 +1956,7 @@ const ExplorePage = () => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white font-medium focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white font-medium"
             >
               <option value="popularity">Sort: Most Popular</option>
               <option value="most_funded">Sort: Most Funded (₹)</option>
@@ -1869,9 +1973,7 @@ const ExplorePage = () => {
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-                  selectedCategory === cat
-                    ? 'bg-[#635BFF] text-white'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  selectedCategory === cat ? 'bg-[#635BFF] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
                 {cat}
@@ -1884,7 +1986,7 @@ const ExplorePage = () => {
               type="checkbox"
               checked={verifiedOnly}
               onChange={(e) => setVerifiedOnly(e.target.checked)}
-              className="rounded text-[#16A34A] focus:ring-[#16A34A]"
+              className="rounded text-[#16A34A]"
             />
             <span className="text-xs font-bold text-emerald-800 flex items-center gap-1">
               <ShieldCheck className="w-3.5 h-3.5" /> Verified Only
@@ -1915,7 +2017,6 @@ const CampaignDetailsPage = () => {
     navigate,
     currentUser,
     toggleWishlist,
-    makeDonation,
     addCampaignExpense,
     addCampaignQuestion,
     replyCampaignQuestion,
@@ -1929,8 +2030,7 @@ const CampaignDetailsPage = () => {
   const [anonymous, setAnonymous] = useState(false);
   const [donorMsg, setDonorMsg] = useState('');
   const [receiptPreview, setReceiptPreview] = useState(null);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [lastDonatedAmt, setLastDonatedAmt] = useState(0);
+  const [gatewayOpen, setGatewayOpen] = useState(false);
 
   const [expenseModalOpen, setExpenseModalOpen] = useState(false);
   const [expDesc, setExpDesc] = useState('');
@@ -1955,29 +2055,15 @@ const CampaignDetailsPage = () => {
       map[e.category] = (map[e.category] || 0) + Number(e.amount);
     });
     const arr = Object.entries(map).map(([name, value]) => ({ name, value }));
-    if (remainingFunds > 0) {
-      arr.push({ name: 'Remaining Escrow', value: remainingFunds });
-    }
+    if (remainingFunds > 0) arr.push({ name: 'Remaining Escrow', value: remainingFunds });
     return arr;
   }, [campaign.expenses, remainingFunds]);
 
   const CHART_COLORS = ['#635BFF', '#16A34A', '#F59E0B', '#0EA5E9', '#EC4899', '#94A3B8'];
 
-  const handleDonateSubmit = async (e) => {
+  const handleOpenGateway = (e) => {
     e.preventDefault();
-    const amt = customAmt ? Number(customAmt) : selectedPreset;
-    const ok = await makeDonation({
-      campaignId: campaign.id,
-      amount: amt,
-      anonymous,
-      message: donorMsg,
-    });
-    if (ok) {
-      setLastDonatedAmt(amt);
-      setShowSuccessModal(true);
-      setDonorMsg('');
-      setCustomAmt('');
-    }
+    setGatewayOpen(true);
   };
 
   const handleFileUpload = (e) => {
@@ -2050,7 +2136,7 @@ const CampaignDetailsPage = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-slate-900">{campaign.creatorName}</p>
-                    <p className="text-xs text-slate-500">{campaign.creatorRole} â€¢ Beneficiary: {campaign.beneficiary}</p>
+                    <p className="text-xs text-slate-500">{campaign.creatorRole} • Beneficiary: {campaign.beneficiary}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
@@ -2089,9 +2175,7 @@ const CampaignDetailsPage = () => {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition ${
-                  activeTab === tab.id
-                    ? 'bg-[#635BFF] text-white shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100'
+                  activeTab === tab.id ? 'bg-[#635BFF] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 {tab.label}
@@ -2115,14 +2199,11 @@ const CampaignDetailsPage = () => {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-extrabold text-slate-900">Transparent Fund Utilization Tracker</h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Every rupee spent is logged with itemized categories and verifiable receipt previews.
-                  </p>
                 </div>
                 {currentUser?.role !== 'donor' && (
                   <button
                     onClick={() => setExpenseModalOpen(true)}
-                    className="px-4 py-2 rounded-xl bg-[#635BFF] text-white text-xs font-bold hover:bg-[#5249F5] flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-xl bg-[#635BFF] text-white text-xs font-bold flex items-center gap-1.5"
                   >
                     <PlusCircle className="w-4 h-4" /> Log Expense & Receipt
                   </button>
@@ -2148,16 +2229,7 @@ const CampaignDetailsPage = () => {
                 <div className="h-64 w-full bg-[#F8F9FC] rounded-2xl p-4 border border-slate-200/70">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
-                      <Pie
-                        data={expenseChartData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={85}
-                        paddingAngle={3}
-                      >
+                      <Pie data={expenseChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3}>
                         {expenseChartData.map((_, idx) => (
                           <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
                         ))}
@@ -2170,38 +2242,23 @@ const CampaignDetailsPage = () => {
               )}
 
               <div className="space-y-3">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Itemized Expense Records</h3>
-                {(campaign.expenses || []).length === 0 ? (
-                  <p className="text-sm text-slate-500 py-6 text-center bg-slate-50 rounded-2xl">
-                    No expenses logged yet. Funds are currently held safely in escrow.
-                  </p>
-                ) : (
-                  campaign.expenses.map((exp, i) => (
-                    <div
-                      key={exp._id || exp.id || i}
-                      className="p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-[#635BFF] transition"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-[#635BFF]">
-                            {exp.category}
-                          </span>
-                          <span className="text-xs text-slate-400">{exp.date}</span>
-                        </div>
-                        <p className="font-bold text-slate-900 mt-1">{exp.description}</p>
-                      </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-4">
-                        <span className="text-base font-extrabold text-slate-900">{formatINR(exp.amount)}</span>
-                        <button
-                          onClick={() => setReceiptPreview(exp)}
-                          className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-[#635BFF] text-white text-xs font-semibold flex items-center gap-1.5 transition"
-                        >
-                          <Receipt className="w-3.5 h-3.5" /> View Receipt
-                        </button>
-                      </div>
+                {(campaign.expenses || []).map((exp, i) => (
+                  <div key={exp._id || exp.id || i} className="p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <span className="px-2.5 py-0.5 rounded-md text-xs font-bold bg-indigo-50 text-[#635BFF]">{exp.category}</span>
+                      <p className="font-bold text-slate-900 mt-1">{exp.description}</p>
                     </div>
-                  ))
-                )}
+                    <div className="flex items-center gap-4">
+                      <span className="text-base font-extrabold text-slate-900">{formatINR(exp.amount)}</span>
+                      <button
+                        onClick={() => setReceiptPreview(exp)}
+                        className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-[#635BFF] text-white text-xs font-semibold flex items-center gap-1.5"
+                      >
+                        <Receipt className="w-3.5 h-3.5" /> View Receipt
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -2210,40 +2267,19 @@ const CampaignDetailsPage = () => {
             <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
               <h2 className="text-xl font-extrabold text-slate-900 mb-6">Milestone-Based Funding Roadmap</h2>
               <div className="relative pl-6 border-l-2 border-indigo-100 space-y-6">
-                {(campaign.milestones || []).map((m, idx) => {
-                  const isDone = m.status === 'Completed';
-                  const isProg = m.status === 'In Progress';
-                  return (
-                    <div key={m._id || m.id || idx} className="relative bg-[#F8F9FC] p-5 rounded-2xl border border-slate-200/80">
-                      <span
-                        className={`w-4 h-4 rounded-full absolute -left-[33px] top-6 ring-4 ring-white ${
-                          isDone ? 'bg-[#16A34A]' : isProg ? 'bg-[#635BFF]' : 'bg-slate-300'
-                        }`}
-                      />
-                      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                          Milestone 0{idx + 1} â€¢ Target Date: {m.deadline}
-                        </span>
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                            isDone
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : isProg
-                              ? 'bg-indigo-100 text-[#635BFF]'
-                              : 'bg-slate-200 text-slate-700'
-                          }`}
-                        >
-                          {m.status}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
-                        <h3 className="font-bold text-slate-900 text-base">{m.title}</h3>
-                        <span className="font-extrabold text-[#635BFF]">{formatINR(m.target)}</span>
-                      </div>
-                      <p className="text-sm text-slate-600">{m.description}</p>
+                {(campaign.milestones || []).map((m, idx) => (
+                  <div key={m._id || m.id || idx} className="relative bg-[#F8F9FC] p-5 rounded-2xl border border-slate-200/80">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-xs font-bold uppercase text-slate-400">Milestone 0{idx + 1}</span>
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-[#635BFF]">{m.status}</span>
                     </div>
-                  );
-                })}
+                    <div className="flex justify-between items-baseline mb-1">
+                      <h3 className="font-bold text-slate-900 text-base">{m.title}</h3>
+                      <span className="font-extrabold text-[#635BFF]">{formatINR(m.target)}</span>
+                    </div>
+                    <p className="text-sm text-slate-600">{m.description}</p>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -2251,57 +2287,37 @@ const CampaignDetailsPage = () => {
           {activeTab === 'updates' && (
             <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-4">
               <h2 className="text-xl font-extrabold text-slate-900 mb-4">Campaign Progress Updates</h2>
-              {(campaign.updates || []).length === 0 ? (
-                <p className="text-sm text-slate-500">No updates posted yet.</p>
-              ) : (
-                campaign.updates.map((upd, idx) => (
-                  <div key={upd._id || upd.id || idx} className="p-5 rounded-2xl bg-[#F8F9FC] border border-slate-200/70">
-                    <span className="text-xs font-bold text-[#635BFF]">{upd.date}</span>
-                    <h3 className="font-bold text-slate-900 text-base mt-1">{upd.title}</h3>
-                    <p className="text-sm text-slate-600 mt-1.5 leading-relaxed">{upd.content}</p>
-                  </div>
-                ))
-              )}
+              {(campaign.updates || []).map((upd, idx) => (
+                <div key={upd._id || upd.id || idx} className="p-5 rounded-2xl bg-[#F8F9FC] border border-slate-200/70">
+                  <span className="text-xs font-bold text-[#635BFF]">{upd.date}</span>
+                  <h3 className="font-bold text-slate-900 text-base mt-1">{upd.title}</h3>
+                  <p className="text-sm text-slate-600 mt-1.5">{upd.content}</p>
+                </div>
+              ))}
             </div>
           )}
 
           {activeTab === 'donors' && (
             <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
-              <h2 className="text-xl font-extrabold text-slate-900 mb-4">
-                Recent Supporters ({campaign.supportersCount})
-              </h2>
+              <h2 className="text-xl font-extrabold text-slate-900 mb-4">Recent Supporters ({campaign.supportersCount})</h2>
               <div className="divide-y divide-slate-100">
-                {(campaign.donors || []).length === 0 ? (
-                  <p className="text-sm text-slate-500 py-4">Be the first supporter of this campaign!</p>
-                ) : (
-                  campaign.donors.map((d, idx) => (
-                    <div key={d._id || d.id || idx} className="py-3.5 flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 text-[#635BFF] font-bold text-xs flex items-center justify-center shrink-0">
-                          {d.anonymous ? '?' : (d.name || 'S').slice(0, 2).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-slate-900">{d.name}</p>
-                          {d.message && <p className="text-xs text-slate-600 mt-0.5">"{d.message}"</p>}
-                          <span className="text-[11px] text-slate-400">{d.date}</span>
-                        </div>
-                      </div>
-                      <span className="font-extrabold text-sm text-[#16A34A] shrink-0">
-                        {formatINR(d.amount)}
-                      </span>
+                {(campaign.donors || []).map((d, idx) => (
+                  <div key={d._id || d.id || idx} className="py-3.5 flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{d.name}</p>
+                      {d.message && <p className="text-xs text-slate-600 mt-0.5">"{d.message}"</p>}
+                      <span className="text-[11px] text-slate-400">{d.date}</span>
                     </div>
-                  ))
-                )}
+                    <span className="font-extrabold text-sm text-[#16A34A]">{formatINR(d.amount)}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
           {activeTab === 'qna' && (
             <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-6">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900">Ask the Campaign Creator</h2>
-              </div>
-
+              <h2 className="text-xl font-extrabold text-slate-900">Ask the Campaign Creator</h2>
               <form
                 onSubmit={async (e) => {
                   e.preventDefault();
@@ -2313,15 +2329,12 @@ const CampaignDetailsPage = () => {
               >
                 <input
                   type="text"
-                  placeholder="Write your question for the creator..."
+                  placeholder="Write your question..."
                   value={newQuestion}
                   onChange={(e) => setNewQuestion(e.target.value)}
-                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
                 />
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#635BFF] text-white font-bold text-sm hover:bg-[#5249F5] flex items-center gap-1.5"
-                >
+                <button type="submit" className="px-5 py-2.5 rounded-xl bg-[#635BFF] text-white font-bold text-sm flex items-center gap-1.5">
                   <Send className="w-4 h-4" /> Ask
                 </button>
               </form>
@@ -2331,21 +2344,11 @@ const CampaignDetailsPage = () => {
                   const qId = item._id || item.id || idx;
                   return (
                     <div key={qId} className="p-4 rounded-2xl bg-[#F8F9FC] border border-slate-200/80 space-y-3">
-                      <div>
-                        <div className="flex justify-between text-xs text-slate-500">
-                          <span className="font-bold text-slate-800">{item.user}</span>
-                          <span>{item.date}</span>
-                        </div>
-                        <p className="text-sm font-semibold text-slate-900 mt-1">Q: {item.question}</p>
-                      </div>
-
+                      <p className="text-sm font-semibold text-slate-900">Q: {item.question}</p>
                       {item.answer ? (
-                        <div className="pl-4 border-l-2 border-[#16A34A] text-sm text-slate-700">
-                          <span className="text-xs font-bold text-[#16A34A] block">Creator Response:</span>
-                          {item.answer}
-                        </div>
+                        <p className="text-sm text-slate-700 pl-4 border-l-2 border-[#16A34A]">{item.answer}</p>
                       ) : (
-                        <div className="flex gap-2 pt-1">
+                        <div className="flex gap-2">
                           <input
                             type="text"
                             placeholder="Write creator reply..."
@@ -2378,9 +2381,7 @@ const CampaignDetailsPage = () => {
           <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xl">
             <div className="mb-4">
               <div className="flex items-baseline justify-between mb-1">
-                <span className="text-3xl font-black text-[#171923]">
-                  {formatINR(campaign.raisedAmount)}
-                </span>
+                <span className="text-3xl font-black text-[#171923]">{formatINR(campaign.raisedAmount)}</span>
                 <span className="text-sm font-bold text-[#635BFF]">{pct}%</span>
               </div>
               <p className="text-xs text-slate-500 mb-3">
@@ -2397,9 +2398,7 @@ const CampaignDetailsPage = () => {
                   <p className="text-lg font-extrabold text-slate-900">
                     {campaign.status === 'Completed' ? 'Funded' : `${campaign.daysLeft} Days`}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    {campaign.status === 'Completed' ? 'Campaign Status' : 'Remaining'}
-                  </p>
+                  <p className="text-xs text-slate-500">Remaining</p>
                 </div>
               </div>
             </div>
@@ -2410,7 +2409,7 @@ const CampaignDetailsPage = () => {
                 <p className="font-bold text-emerald-900 text-sm">Campaign Successfully Funded!</p>
               </div>
             ) : (
-              <form onSubmit={handleDonateSubmit} className="space-y-4">
+              <form onSubmit={handleOpenGateway} className="space-y-4">
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                     Choose Amount
@@ -2439,7 +2438,7 @@ const CampaignDetailsPage = () => {
                       placeholder="Custom ₹"
                       value={customAmt}
                       onChange={(e) => setCustomAmt(e.target.value)}
-                      className="px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+                      className="px-2.5 py-2 rounded-xl border border-slate-200 text-xs font-bold"
                     />
                   </div>
                 </div>
@@ -2449,7 +2448,7 @@ const CampaignDetailsPage = () => {
                   placeholder="Optional message of support..."
                   value={donorMsg}
                   onChange={(e) => setDonorMsg(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-[#635BFF]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs"
                 />
 
                 <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -2467,7 +2466,7 @@ const CampaignDetailsPage = () => {
                   className="w-full py-3.5 rounded-xl bg-[#635BFF] hover:bg-[#5249F5] text-white font-bold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2"
                 >
                   <Heart className="w-4 h-4 fill-current" />
-                  Donate {formatINR(customAmt ? Number(customAmt) : selectedPreset)} Now
+                  Proceed to Pay {formatINR(customAmt ? Number(customAmt) : selectedPreset)}
                 </button>
               </form>
             )}
@@ -2475,112 +2474,42 @@ const CampaignDetailsPage = () => {
         </div>
       </div>
 
-      <Modal
-        isOpen={!!receiptPreview}
-        onClose={() => setReceiptPreview(null)}
-        title="Verified Expense Receipt Preview"
-        maxWidth="max-w-md"
-      >
-        {receiptPreview && (
-          <div className="space-y-4">
-            <img
-              src={receiptPreview.receiptUrl}
-              alt="Receipt"
-              className="w-full rounded-xl border border-slate-200 shadow-sm"
-            />
-          </div>
-        )}
+      <QuickDonationModal
+        campaign={gatewayOpen ? campaign : null}
+        initialAmount={customAmt ? Number(customAmt) : selectedPreset}
+        initialMessage={donorMsg}
+        initialAnonymous={anonymous}
+        onClose={() => setGatewayOpen(false)}
+      />
+
+      <Modal isOpen={!!receiptPreview} onClose={() => setReceiptPreview(null)} title="Verified Expense Receipt Preview" maxWidth="max-w-md">
+        {receiptPreview && <img src={receiptPreview.receiptUrl} alt="Receipt" className="w-full rounded-xl border border-slate-200" />}
       </Modal>
 
-      <Modal
-        isOpen={expenseModalOpen}
-        onClose={() => setExpenseModalOpen(false)}
-        title="Log New Fund Utilization Expense"
-      >
+      <Modal isOpen={expenseModalOpen} onClose={() => setExpenseModalOpen(false)} title="Log New Fund Utilization Expense">
         <form onSubmit={handleAddExpenseSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Expense Description *</label>
-            <input
-              type="text"
-              required
-              value={expDesc}
-              onChange={(e) => setExpDesc(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
-          </div>
+          <input type="text" required placeholder="Expense Description *" value={expDesc} onChange={(e) => setExpDesc(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Amount (₹) *</label>
-              <input
-                type="number"
-                required
-                min="1"
-                value={expAmt}
-                onChange={(e) => setExpAmt(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Expense Category</label>
-              <select
-                value={expCat}
-                onChange={(e) => setExpCat(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
-              >
-                <option>Hospital Fees</option>
-                <option>Medicines</option>
-                <option>Medical Tests</option>
-                <option>Tuition & Fees</option>
-                <option>Equipment</option>
-                <option>Logistics & Supplies</option>
-              </select>
-            </div>
+            <input type="number" required min="1" placeholder="Amount (₹) *" value={expAmt} onChange={(e) => setExpAmt(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+            <select value={expCat} onChange={(e) => setExpCat(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white">
+              <option>Hospital Fees</option>
+              <option>Medicines</option>
+              <option>Medical Tests</option>
+              <option>Tuition & Fees</option>
+              <option>Equipment</option>
+            </select>
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Vendor / Institution Name</label>
-            <input
-              type="text"
-              value={expVendor}
-              onChange={(e) => setExpVendor(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Upload Receipt Image</label>
-            <input type="file" accept="image/*" onChange={handleFileUpload} className="w-full text-xs" />
-          </div>
-          <button type="submit" className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">
-            Publish Expense to Public Ledger
-          </button>
+          <input type="text" placeholder="Vendor Name" value={expVendor} onChange={(e) => setExpVendor(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          <input type="file" accept="image/*" onChange={handleFileUpload} className="w-full text-xs" />
+          <button type="submit" className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">Publish Expense</button>
         </form>
-      </Modal>
-
-      <Modal
-        isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
-        title="Donation Confirmed"
-      >
-        <div className="text-center py-4 space-y-4">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 text-[#16A34A] flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-9 h-9" />
-          </div>
-          <h3 className="text-xl font-extrabold text-slate-900">
-            You Contributed {formatINR(lastDonatedAmt)}!
-          </h3>
-          <button
-            onClick={() => setShowSuccessModal(false)}
-            className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm"
-          >
-            Continue Viewing Campaign
-          </button>
-        </div>
       </Modal>
     </div>
   );
 };
 
 // ============================================================================
-// 10. AI CAMPAIGN ASSISTANT PAGE
+// 10. AI CAMPAIGN ASSISTANT & CREATE CAMPAIGN WIZARD
 // ============================================================================
 
 const AIWriterPage = () => {
@@ -2590,123 +2519,54 @@ const AIWriterPage = () => {
   const [goal, setGoal] = useState('350000');
   const [shortDesc, setShortDesc] = useState('');
   const [audience, setAudience] = useState('Individual Donors & CSR Supporters');
-  const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
   const handleGenerate = (e) => {
     e.preventDefault();
-    if (!idea.trim()) {
-      showToast('Please enter a campaign topic or basic idea.', 'warning');
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      const numericGoal = Number(goal) || 250000;
-      const generated = {
-        title: `Empowering Change: ${idea.trim().replace(/^\w/, (c) => c.toUpperCase())} (${category} Initiative)`,
-        category,
-        suggestedTarget: numericGoal,
-        summary: `A transparent, milestone-driven ${category.toLowerCase()} campaign aimed at ${idea.trim().toLowerCase()} for ${audience.toLowerCase()}, backed by itemized receipt tracking.`,
-        story: `Every meaningful transformation begins when a community stands together.\n\nOur initiative focuses on ${idea.trim()}. ${
-          shortDesc ? shortDesc + '\n\n' : ''
-        }Designed specifically to benefit ${audience}, this campaign operates on FundBridgeâ€™s 100% transparency standard.`,
-        socialCaption: `Support our verified ${category} fundraiser: "${idea.trim()}". #FundBridge #SocialImpact`,
-        tags: [category, 'VerifiedImpact', 'TransparentGiving'],
-      };
-      setResult(generated);
-      setLoading(false);
-    }, 600);
-  };
-
-  const handleUseInCreator = () => {
-    if (!result) return;
-    setAiDraft(result);
-    showToast('AI Draft transferred to Campaign Creator!');
-    navigate('create-campaign');
+    if (!idea.trim()) return;
+    setResult({
+      title: `Empowering Change: ${idea.trim()} (${category} Initiative)`,
+      category,
+      suggestedTarget: Number(goal) || 250000,
+      summary: `A transparent ${category.toLowerCase()} campaign aimed at ${idea.trim().toLowerCase()} for ${audience.toLowerCase()}.`,
+      story: `Our initiative focuses on ${idea.trim()}. ${shortDesc}\n\nDesigned to benefit ${audience} with 100% receipt transparency.`,
+    });
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <h1 className="text-3xl font-extrabold text-[#171923]">Craft a High-Trust Campaign Story</h1>
-      </div>
-
+    <div className="max-w-5xl mx-auto px-4 pt-10">
+      <h1 className="text-3xl font-extrabold text-center mb-8">Craft a High-Trust Campaign Story</h1>
       <div className="grid lg:grid-cols-12 gap-8">
-        <form onSubmit={handleGenerate} className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4 h-fit">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Campaign Category</label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
-            >
-              {CATEGORIES.map((c) => (
-                <option key={c.id} value={c.id}>{c.label}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Campaign Title or Core Idea *</label>
-            <input
-              type="text"
-              required
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Estimated Funding Goal (₹)</label>
-            <input
-              type="number"
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Target Beneficiaries / Audience</label>
-            <input
-              type="text"
-              value={audience}
-              onChange={(e) => setAudience(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Key Context</label>
-            <textarea
-              rows={3}
-              value={shortDesc}
-              onChange={(e) => setShortDesc(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm"
-          >
-            {loading ? 'Generating...' : 'Generate Campaign Draft'}
-          </button>
+        <form onSubmit={handleGenerate} className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200 space-y-4">
+          <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white">
+            {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          </select>
+          <input type="text" required placeholder="Campaign Idea *" value={idea} onChange={(e) => setIdea(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          <input type="number" placeholder="Goal (₹)" value={goal} onChange={(e) => setGoal(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          <input type="text" placeholder="Target Audience" value={audience} onChange={(e) => setAudience(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          <textarea rows={3} placeholder="Key context..." value={shortDesc} onChange={(e) => setShortDesc(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          <button type="submit" className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">Generate Campaign Draft</button>
         </form>
-
         <div className="lg:col-span-7">
           {result ? (
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-5">
-              <h3 className="text-xl font-extrabold text-slate-900">{result.title}</h3>
-              <p className="text-sm text-slate-700 bg-slate-50 p-3.5 rounded-xl">{result.summary}</p>
-              <p className="text-sm text-slate-700 whitespace-pre-line bg-slate-50 p-4 rounded-xl">{result.story}</p>
+            <div className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4">
+              <h3 className="text-xl font-extrabold">{result.title}</h3>
+              <p className="text-sm bg-slate-50 p-3.5 rounded-xl">{result.summary}</p>
+              <p className="text-sm whitespace-pre-line bg-slate-50 p-4 rounded-xl">{result.story}</p>
               <button
-                onClick={handleUseInCreator}
-                className="w-full py-3.5 rounded-xl bg-[#16A34A] text-white font-bold text-sm"
+                onClick={() => {
+                  setAiDraft(result);
+                  showToast('Draft transferred!');
+                  navigate('create-campaign');
+                }}
+                className="w-full py-3 rounded-xl bg-[#16A34A] text-white font-bold text-sm"
               >
                 Use This Draft in Campaign Creator
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center">
-              <p className="font-bold text-slate-800">Your AI Draft Will Appear Here</p>
+            <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center font-bold text-slate-500">
+              Your AI Draft Will Appear Here
             </div>
           )}
         </div>
@@ -2715,10 +2575,6 @@ const AIWriterPage = () => {
   );
 };
 
-// ============================================================================
-// 11. CREATE CAMPAIGN PAGE (5-STEP WIZARD)
-// ============================================================================
-
 const CreateCampaignPage = () => {
   const { aiDraft, setAiDraft, addCampaign, navigate, showToast, currentUser } = useApp();
   const [step, setStep] = useState(1);
@@ -2726,16 +2582,10 @@ const CreateCampaignPage = () => {
   if (currentUser?.role === 'donor') {
     return (
       <div className="max-w-xl mx-auto px-4 pt-16 text-center">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-4">
+        <div className="bg-white rounded-3xl border border-slate-200 p-8 space-y-4">
           <Lock className="w-10 h-10 text-[#EF4444] mx-auto" />
-          <h2 className="text-2xl font-extrabold text-slate-900">Creator Account Required</h2>
-          <p className="text-sm text-slate-600">
-            Your current account (<strong>{currentUser.name}</strong>) is registered as a <strong>Donor</strong>. Sign up with a Creator account to launch campaigns.
-          </p>
-          <button
-            onClick={() => navigate('explore')}
-            className="px-6 py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm"
-          >
+          <h2 className="text-2xl font-extrabold">Creator Account Required</h2>
+          <button onClick={() => navigate('explore')} className="px-6 py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">
             Back to Explore Campaigns
           </button>
         </div>
@@ -2748,339 +2598,69 @@ const CreateCampaignPage = () => {
     category: aiDraft?.category || 'Education',
     location: 'Bengaluru, Karnataka',
     isEmergency: false,
-    coverTheme: '#635BFF',
-    customImage: '',
     shortDescription: aiDraft?.summary || '',
     story: aiDraft?.story || '',
     beneficiary: '',
     targetAmount: aiDraft?.suggestedTarget || 250000,
     daysLeft: 30,
-    milestone1Title: 'Phase 1: Initial Procurement & Setup',
-    milestone1Amount: 100000,
-    milestone2Title: 'Phase 2: Core Execution & Delivery',
-    milestone2Amount: 150000,
-    idDocName: '',
-    supportDocName: '',
-    bankVerifiedSim: true,
   });
 
   useEffect(() => {
     if (aiDraft) {
-      setForm((prev) => ({
-        ...prev,
-        title: aiDraft.title,
-        category: aiDraft.category,
-        shortDescription: aiDraft.summary,
-        story: aiDraft.story,
-        targetAmount: aiDraft.suggestedTarget,
-      }));
+      setForm((prev) => ({ ...prev, title: aiDraft.title, category: aiDraft.category, shortDescription: aiDraft.summary, story: aiDraft.story, targetAmount: aiDraft.suggestedTarget }));
       setAiDraft(null);
     }
   }, [aiDraft, setAiDraft]);
 
-  const handleCoverUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setForm({ ...form, customImage: reader.result });
-    reader.readAsDataURL(file);
-  };
-
   const handlePublish = async () => {
     if (!form.title.trim() || !form.story.trim()) {
-      showToast('Please complete required title and story fields.', 'error');
+      showToast('Complete title and story first.', 'error');
       return;
     }
-
-    const trustScore =
-      70 +
-      (form.idDocName ? 10 : 0) +
-      (form.supportDocName ? 10 : 0) +
-      (form.bankVerifiedSim ? 5 : 0);
-
-    const coverImg =
-      form.customImage ||
-      createIllustrationSVG(
-        form.title.slice(0, 26),
-        `${form.category} â€¢ ${form.location}`,
-        form.coverTheme,
-        '#171923',
-        form.isEmergency ? 'URGENT CAUSE' : 'VERIFIED CAMPAIGN'
-      );
-
     const created = await addCampaign({
-      title: form.title,
-      category: form.category,
-      location: form.location,
-      status: form.isEmergency ? 'Urgent' : 'Active',
-      isEmergency: form.isEmergency,
-      urgencyLabel: form.isEmergency ? 'Urgent Community Appeal' : undefined,
-      verified: trustScore >= 85,
-      trustScore,
-      verificationDetails: {
-        identity: form.idDocName ? 'Verified' : 'Pending',
-        documents: form.supportDocName ? 'Verified' : 'Pending',
-        bank: form.bankVerifiedSim ? 'Verified' : 'Not Submitted',
-        completeness: 94,
-        transparency: 'Verified',
-      },
+      ...form,
       targetAmount: Number(form.targetAmount),
       daysLeft: Number(form.daysLeft),
-      image: coverImg,
-      shortDescription: form.shortDescription || form.story.slice(0, 140),
-      story: form.story,
-      beneficiary: form.beneficiary || 'Verified Community Beneficiary',
+      verified: true,
+      trustScore: 90,
+      image: createIllustrationSVG(form.title.slice(0, 26), `${form.category} • ${form.location}`, '#635BFF', '#171923'),
       expenses: [],
       milestones: [
-        {
-          id: generateId('m'),
-          title: form.milestone1Title,
-          target: Number(form.milestone1Amount),
-          deadline: '2026-12-10',
-          status: 'In Progress',
-          description: 'Initial phase allocation with receipt verification.',
-        },
-        {
-          id: generateId('m'),
-          title: form.milestone2Title,
-          target: Number(form.milestone2Amount),
-          deadline: '2027-01-15',
-          status: 'Upcoming',
-          description: 'Final phase execution and impact report.',
-        },
+        { id: generateId('m'), title: 'Phase 1 Execution', target: Math.round(Number(form.targetAmount) / 2), deadline: '2026-12-15', status: 'In Progress', description: 'Initial phase.' },
       ],
     });
-
-    if (created) {
-      navigate('campaign-details', { id: created.id });
-    }
+    if (created) navigate('campaign-details', { id: created.id });
   };
 
-  const steps = ['Basic Info', 'Campaign Story', 'Funding & Milestones', 'Verification', 'Review & Publish'];
-
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-extrabold text-[#171923]">Launch a Verified Campaign</h1>
-          <p className="text-sm text-slate-600 mt-1">Complete the 5 steps below to publish live on FundBridge.</p>
-        </div>
-        <button
-          onClick={() => navigate('ai-writer')}
-          className="px-4 py-2 rounded-xl bg-indigo-50 text-[#635BFF] text-xs font-bold flex items-center gap-1.5 hover:bg-indigo-100"
-        >
-          <Sparkles className="w-4 h-4" /> Draft with AI Assistant
-        </button>
-      </div>
-
-      <div className="grid grid-cols-5 gap-2 mb-8">
-        {steps.map((label, idx) => {
-          const sNum = idx + 1;
-          const active = step === sNum;
-          const done = step > sNum;
-          return (
-            <button
-              key={label}
-              type="button"
-              onClick={() => setStep(sNum)}
-              className={`p-3 rounded-2xl border text-left transition ${
-                active
-                  ? 'bg-[#635BFF] text-white border-[#635BFF] shadow-md'
-                  : done
-                  ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
-                  : 'bg-white text-slate-500 border-slate-200'
-              }`}
-            >
-              <span className="text-[10px] font-bold uppercase block">Step 0{sNum}</span>
-              <span className="text-xs font-bold truncate block mt-0.5">{label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+    <div className="max-w-3xl mx-auto px-4 pt-10 space-y-6">
+      <h1 className="text-3xl font-extrabold">Launch a Verified Campaign</h1>
+      <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 space-y-4">
         {step === 1 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-extrabold text-slate-900">Step 1: Basic Information</h2>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Campaign Title *</label>
-              <input
-                type="text"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
-
+          <>
+            <input type="text" placeholder="Campaign Title *" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm" />
             <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
-                <select
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
-                >
-                  {CATEGORIES.map((c) => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">City & State</label>
-                <input
-                  type="text"
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
+              <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white">
+                {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+              <input type="text" placeholder="City, State" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm" />
             </div>
-
-            <label className="flex items-center gap-2.5 p-3.5 rounded-xl bg-red-50/70 border border-red-100 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={form.isEmergency}
-                onChange={(e) => setForm({ ...form, isEmergency: e.target.checked })}
-                className="rounded text-[#EF4444]"
-              />
-              <span className="text-xs font-bold text-red-900">
-                Mark as Time-Sensitive Emergency Campaign
-              </span>
-            </label>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Upload Custom Cover Image</label>
-              <input type="file" accept="image/*" onChange={handleCoverUpload} className="w-full text-xs text-slate-600 mb-3" />
-            </div>
-          </div>
+            <input type="number" placeholder="Target Amount (₹)" value={form.targetAmount} onChange={(e) => setForm({ ...form, targetAmount: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          </>
         )}
-
         {step === 2 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-extrabold text-slate-900">Step 2: Campaign Story & Beneficiary</h2>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Short Summary</label>
-              <input
-                type="text"
-                value={form.shortDescription}
-                onChange={(e) => setForm({ ...form, shortDescription: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Beneficiary Details</label>
-              <input
-                type="text"
-                value={form.beneficiary}
-                onChange={(e) => setForm({ ...form, beneficiary: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Full Fundraising Story *</label>
-              <textarea
-                rows={6}
-                value={form.story}
-                onChange={(e) => setForm({ ...form, story: e.target.value })}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
-          </div>
+          <>
+            <input type="text" placeholder="Short Summary" value={form.shortDescription} onChange={(e) => setForm({ ...form, shortDescription: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm" />
+            <input type="text" placeholder="Beneficiary Details" value={form.beneficiary} onChange={(e) => setForm({ ...form, beneficiary: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm" />
+            <textarea rows={6} placeholder="Full Campaign Story *" value={form.story} onChange={(e) => setForm({ ...form, story: e.target.value })} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          </>
         )}
-
-        {step === 3 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-extrabold text-slate-900">Step 3: Funding Target & Milestones</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Total Funding Target (₹)</label>
-                <input
-                  type="number"
-                  min="1000"
-                  value={form.targetAmount}
-                  onChange={(e) => setForm({ ...form, targetAmount: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Campaign Duration (Days)</label>
-                <input
-                  type="number"
-                  min="3"
-                  max="120"
-                  value={form.daysLeft}
-                  onChange={(e) => setForm({ ...form, daysLeft: e.target.value })}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 4 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-extrabold text-slate-900">Step 4: Verification Documents</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-2xl border border-slate-200">
-                <p className="text-sm font-bold text-slate-900 mb-1">1. Creator Identity Proof</p>
-                <input
-                  type="file"
-                  onChange={(e) => setForm({ ...form, idDocName: e.target.files?.[0]?.name || 'sample_id.pdf' })}
-                  className="text-xs"
-                />
-              </div>
-              <div className="p-4 rounded-2xl border border-slate-200">
-                <p className="text-sm font-bold text-slate-900 mb-1">2. Supporting Estimate</p>
-                <input
-                  type="file"
-                  onChange={(e) => setForm({ ...form, supportDocName: e.target.files?.[0]?.name || 'estimate_doc.pdf' })}
-                  className="text-xs"
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {step === 5 && (
-          <div className="space-y-5">
-            <h2 className="text-xl font-extrabold text-slate-900">Step 5: Review & Publish</h2>
-            <div className="p-5 rounded-2xl bg-[#F8F9FC] border border-slate-200 space-y-3">
-              <h3 className="text-xl font-extrabold text-slate-900">{form.title || 'Untitled Campaign'}</h3>
-              <p className="text-sm text-slate-600">{form.shortDescription || form.story.slice(0, 160)}</p>
-              <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-200 text-xs">
-                <div><span className="text-slate-400 block">Target Goal</span><strong className="text-sm">{formatINR(form.targetAmount)}</strong></div>
-                <div><span className="text-slate-400 block">Duration</span><strong className="text-sm">{form.daysLeft} Days</strong></div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="flex justify-between pt-6 mt-6 border-t border-slate-100">
-          <button
-            type="button"
-            disabled={step === 1}
-            onClick={() => setStep(step - 1)}
-            className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-700 disabled:opacity-40"
-          >
-            Previous
-          </button>
-
-          {step < 5 ? (
-            <button
-              type="button"
-              onClick={() => setStep(step + 1)}
-              className="px-6 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-bold hover:bg-[#5249F5]"
-            >
-              Next Step
-            </button>
+        <div className="flex justify-between pt-4">
+          <button type="button" disabled={step === 1} onClick={() => setStep(1)} className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold disabled:opacity-40">Previous</button>
+          {step === 1 ? (
+            <button type="button" onClick={() => setStep(2)} className="px-6 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-bold">Next</button>
           ) : (
-            <button
-              type="button"
-              onClick={handlePublish}
-              className="px-7 py-2.5 rounded-xl bg-[#16A34A] hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-500/20"
-            >
-              Publish Campaign Live
-            </button>
+            <button type="button" onClick={handlePublish} className="px-7 py-2.5 rounded-xl bg-[#16A34A] text-white text-sm font-bold">Publish Live</button>
           )}
         </div>
       </div>
@@ -3089,359 +2669,40 @@ const CreateCampaignPage = () => {
 };
 
 // ============================================================================
-// 12. DONOR DASHBOARD, CREATOR DASHBOARD & ADMIN MODERATION
+// 11. DASHBOARDS & SECONDARY PAGES
 // ============================================================================
 
 const DonorDashboardPage = () => {
-  const { currentUser, donations, campaigns, navigate } = useApp();
-
-  const myDonations = useMemo(
-    () => donations.filter((d) => d.userId === currentUser?.id || d.donorName === currentUser?.name),
-    [donations, currentUser]
-  );
-
+  const { currentUser, donations, navigate } = useApp();
+  const myDonations = donations.filter((d) => d.userId === currentUser?.id || d.donorName === currentUser?.name);
   const totalDonated = myDonations.reduce((acc, d) => acc + d.amount, 0);
-  const supportedIds = Array.from(new Set(myDonations.map((d) => d.campaignId)));
-  const savedCampaigns = campaigns.filter((c) => currentUser?.wishlist?.includes(c.id));
-
-  const categoryData = useMemo(() => {
-    const map = {};
-    myDonations.forEach((d) => {
-      map[d.category] = (map[d.category] || 0) + d.amount;
-    });
-    return Object.entries(map).map(([category, amount]) => ({ category, amount }));
-  }, [myDonations]);
-
-  const badges = [
-    { name: 'First Supporter', unlocked: myDonations.length >= 1 },
-    { name: 'Helping Hand', unlocked: totalDonated >= 2500 },
-    { name: 'Community Hero', unlocked: supportedIds.length >= 3 },
-    { name: 'Change Maker', unlocked: totalDonated >= 10000 },
-    { name: 'Super Supporter', unlocked: totalDonated >= 25000 },
-  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold uppercase text-[#635BFF]">Donor Impact Portal</span>
-          <h1 className="text-3xl font-extrabold text-[#171923]">Welcome back, {currentUser?.name || 'Supporter'}</h1>
-        </div>
-        <button
-          onClick={() => navigate('explore')}
-          className="px-4 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-bold"
-        >
-          Discover More Causes
-        </button>
+    <div className="max-w-7xl mx-auto px-4 pt-10 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-extrabold">Donor Dashboard • {currentUser?.name}</h1>
+        <button onClick={() => navigate('explore')} className="px-4 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-bold">Explore Causes</button>
       </div>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Donated', val: formatINR(totalDonated), color: '#635BFF' },
-          { label: 'Campaigns Supported', val: supportedIds.length, color: '#16A34A' },
-          { label: 'Saved Wishlist', val: savedCampaigns.length, color: '#F59E0B' },
-          { label: 'Unlocked Badges', val: `${badges.filter((b) => b.unlocked).length}/5`, color: '#0EA5E9' },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500">{stat.label}</p>
-            <p className="text-2xl font-black mt-1" style={{ color: stat.color }}>{stat.val}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
-          <h3 className="text-base font-extrabold text-slate-900 mb-4">Giving by Category</h3>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={categoryData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="category" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v) => formatINR(v)} />
-                <Bar dataKey="amount" fill="#635BFF" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
-          <h3 className="text-base font-extrabold text-slate-900 mb-4">Donation History</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-slate-100 text-xs text-slate-400 uppercase">
-                  <th className="pb-3">Campaign</th>
-                  <th className="pb-3">Date</th>
-                  <th className="pb-3">Amount</th>
-                  <th className="pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {myDonations.map((d) => (
-                  <tr key={d.id}>
-                    <td className="py-3 font-semibold text-slate-900 pr-3">
-                      <button
-                        onClick={() => navigate('campaign-details', { id: d.campaignId })}
-                        className="hover:text-[#635BFF] text-left line-clamp-1"
-                      >
-                        {d.campaignTitle}
-                      </button>
-                    </td>
-                    <td className="py-3 text-xs text-slate-500 whitespace-nowrap">{d.date}</td>
-                    <td className="py-3 font-extrabold text-slate-900">{formatINR(d.amount)}</td>
-                    <td className="py-3">
-                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-[#16A34A]">
-                        {d.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const CreatorDashboardPage = () => {
-  const {
-    campaigns,
-    deleteCampaign,
-    updateMilestoneStatus,
-    addCampaignUpdate,
-    navigate,
-  } = useApp();
-
-  const [selectedCampId, setSelectedCampId] = useState(campaigns[0]?.id || 'camp_1');
-  const [updTitle, setUpdTitle] = useState('');
-  const [updContent, setUpdContent] = useState('');
-
-  const managedCampaigns = campaigns.slice(0, 6);
-  const activeCamp = campaigns.find((c) => c.id === selectedCampId) || managedCampaigns[0];
-
-  const totalRaisedAll = managedCampaigns.reduce((acc, c) => acc + c.raisedAmount, 0);
-  const totalSupportersAll = managedCampaigns.reduce((acc, c) => acc + c.supportersCount, 0);
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold uppercase text-[#16A34A]">Creator Command Center</span>
-          <h1 className="text-3xl font-extrabold text-[#171923]">Campaign & Transparency Management</h1>
-        </div>
-        <button
-          onClick={() => navigate('create-campaign')}
-          className="px-4 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-bold flex items-center gap-1.5"
-        >
-          <PlusCircle className="w-4 h-4" /> New Campaign
-        </button>
-      </div>
-
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { label: 'Total Funds Raised', val: formatINR(totalRaisedAll), color: '#16A34A' },
-          { label: 'Managed Campaigns', val: managedCampaigns.length, color: '#635BFF' },
-          { label: 'Total Supporters', val: totalSupportersAll, color: '#0EA5E9' },
-        ].map((s, idx) => (
-          <div key={idx} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-            <p className="text-xs font-semibold text-slate-500">{s.label}</p>
-            <p className="text-2xl font-black mt-1" style={{ color: s.color }}>{s.val}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
-        <h3 className="text-lg font-extrabold text-slate-900 mb-4">Your Campaigns</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-xs text-slate-400 uppercase">
-                <th className="pb-3">Campaign</th>
-                <th className="pb-3">Raised / Target</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {managedCampaigns.map((c) => (
-                <tr key={c.id} className={selectedCampId === c.id ? 'bg-indigo-50/40' : ''}>
-                  <td className="py-3.5 pr-4">
-                    <p className="font-bold text-slate-900 line-clamp-1">{c.title}</p>
-                    <span className="text-xs text-slate-500">{c.category}</span>
-                  </td>
-                  <td className="py-3.5 whitespace-nowrap">
-                    <span className="font-bold text-slate-900">{formatINR(c.raisedAmount)}</span>
-                    <span className="text-xs text-slate-400"> / {formatCompactINR(c.targetAmount)}</span>
-                  </td>
-                  <td className="py-3.5">
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">
-                      {c.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 text-right whitespace-nowrap space-x-1.5">
-                    <button
-                      onClick={() => setSelectedCampId(c.id)}
-                      className="px-2.5 py-1.5 rounded-lg bg-indigo-50 text-[#635BFF] text-xs font-bold"
-                    >
-                      Manage
-                    </button>
-                    <button
-                      onClick={() => navigate('campaign-details', { id: c.id })}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => deleteCampaign(c.id)}
-                      className="px-2.5 py-1.5 rounded-lg bg-red-50 text-[#EF4444] text-xs font-bold"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="bg-white p-5 rounded-2xl border border-slate-200">
+          <p className="text-xs text-slate-500">Total Donated</p>
+          <p className="text-2xl font-black text-[#635BFF] mt-1">{formatINR(totalDonated)}</p>
+        </div>
+        <div className="bg-white p-5 rounded-2xl border border-slate-200">
+          <p className="text-xs text-slate-500">Contributions Made</p>
+          <p className="text-2xl font-black text-[#16A34A] mt-1">{myDonations.length}</p>
         </div>
       </div>
-
-      {activeCamp && (
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-            <h3 className="text-base font-extrabold text-slate-900">Update Milestones</h3>
-            {(activeCamp.milestones || []).map((m, idx) => {
-              const mId = m._id || m.id || idx;
-              return (
-                <div key={mId} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">{m.title}</p>
-                    <p className="text-xs text-slate-500">{formatINR(m.target)}</p>
-                  </div>
-                  <select
-                    value={m.status}
-                    onChange={(e) => updateMilestoneStatus(activeCamp.id, mId, e.target.value)}
-                    className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold"
-                  >
-                    <option value="Upcoming">Upcoming</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                  </select>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-            <h3 className="text-base font-extrabold text-slate-900">Publish Creator Progress Update</h3>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                if (!updTitle.trim() || !updContent.trim()) return;
-                await addCampaignUpdate(activeCamp.id, updTitle, updContent);
-                setUpdTitle('');
-                setUpdContent('');
-              }}
-              className="space-y-3"
-            >
-              <input
-                type="text"
-                required
-                placeholder="Update Headline"
-                value={updTitle}
-                onChange={(e) => setUpdTitle(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
-              />
-              <textarea
-                rows={3}
-                required
-                placeholder="Share transparent progress..."
-                value={updContent}
-                onChange={(e) => setUpdContent(e.target.value)}
-                className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
-              />
-              <button type="submit" className="w-full py-2.5 rounded-xl bg-[#16A34A] text-white text-sm font-bold">
-                Post Update to Supporters
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-const AdminDashboardPage = () => {
-  const { campaigns, users, donations, updateCampaign, showToast, navigate, currentUser } = useApp();
-
-  if (!currentUser || currentUser.role !== 'admin') {
-    return (
-      <div className="max-w-xl mx-auto px-4 pt-16 text-center">
-        <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-4">
-          <ShieldAlert className="w-10 h-10 text-[#EF4444] mx-auto" />
-          <h2 className="text-2xl font-extrabold text-slate-900">403 Forbidden â€¢ Admin Only</h2>
-          <p className="text-sm text-slate-600">You do not have permission to view the Admin Moderation Console.</p>
-          <button
-            onClick={() => navigate('home')}
-            className="px-6 py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm"
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const pendingCampaigns = campaigns.filter((c) => !c.verified || c.status === 'Pending');
-  const totalVolume = donations.reduce((acc, d) => acc + d.amount, 0) + campaigns.reduce((acc, c) => acc + c.raisedAmount, 0);
-
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Registered Users', val: users.length + 1420 },
-          { label: 'Total Campaigns', val: campaigns.length },
-          { label: 'Platform Volume', val: formatCompactINR(totalVolume) },
-          { label: 'Pending Verification', val: pendingCampaigns.length },
-        ].map((s, i) => (
-          <div key={i} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p className="text-xs text-slate-500">{s.label}</p>
-            <p className="text-2xl font-black text-slate-900 mt-1">{s.val}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-        <h2 className="text-lg font-extrabold text-slate-900 mb-4">Campaign Verification & Trust Queue</h2>
+      <div className="bg-white p-6 rounded-3xl border border-slate-200">
+        <h3 className="text-base font-extrabold mb-4">Transaction History</h3>
         <div className="space-y-3">
-          {campaigns.map((c) => (
-            <div key={c.id} className="p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          {myDonations.map((d) => (
+            <div key={d.id} className="p-3.5 rounded-xl bg-slate-50 flex justify-between items-center text-sm">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <TrustBadge verified={c.verified} score={c.trustScore} />
-                  <span className="text-xs text-slate-500">{c.category} â€¢ {c.location}</span>
-                </div>
-                <p className="font-bold text-slate-900">{c.title}</p>
+                <p className="font-bold">{d.campaignTitle}</p>
+                <span className="text-xs text-slate-500">{d.date} {d.transactionRef ? `• ${d.transactionRef}` : ''}</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => navigate('campaign-details', { id: c.id })}
-                  className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold"
-                >
-                  Inspect
-                </button>
-                <button
-                  onClick={() => {
-                    updateCampaign(c.id, { verified: true, status: 'Active', trustScore: Math.max(92, c.trustScore) });
-                    showToast(`Approved "${c.title}"`);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-[#16A34A] text-white text-xs font-bold"
-                >
-                  Approve & Verify
-                </button>
-              </div>
+              <span className="font-extrabold text-[#16A34A]">{formatINR(d.amount)}</span>
             </div>
           ))}
         </div>
@@ -3450,56 +2711,82 @@ const AdminDashboardPage = () => {
   );
 };
 
-// ============================================================================
-// 13. IMPACT WALL, SUCCESS STORIES, EMERGENCY HUB, GROUP FUNDING, HOW IT WORKS
-// ============================================================================
+const CreatorDashboardPage = () => {
+  const { campaigns, deleteCampaign, navigate } = useApp();
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-10 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-extrabold">Creator Command Center</h1>
+        <button onClick={() => navigate('create-campaign')} className="px-4 py-2.5 rounded-xl bg-[#635BFF] text-white text-sm font-bold">+ New Campaign</button>
+      </div>
+      <div className="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+        {campaigns.map((c) => (
+          <div key={c.id} className="p-4 rounded-2xl border border-slate-200 flex justify-between items-center gap-4">
+            <div>
+              <p className="font-bold">{c.title}</p>
+              <span className="text-xs text-slate-500">{formatINR(c.raisedAmount)} / {formatINR(c.targetAmount)}</span>
+            </div>
+            <div className="space-x-2">
+              <button onClick={() => navigate('campaign-details', { id: c.id })} className="px-3 py-1.5 rounded-lg bg-slate-100 text-xs font-bold">View</button>
+              <button onClick={() => deleteCampaign(c.id)} className="px-3 py-1.5 rounded-lg bg-red-50 text-[#EF4444] text-xs font-bold">Delete</button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const AdminDashboardPage = () => {
+  const { campaigns, updateCampaign, showToast, currentUser, navigate } = useApp();
+  if (!currentUser || currentUser.role !== 'admin') {
+    return (
+      <div className="max-w-xl mx-auto px-4 pt-16 text-center">
+        <h2 className="text-2xl font-extrabold mb-4">Admin Only</h2>
+        <button onClick={() => navigate('home')} className="px-6 py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">Home</button>
+      </div>
+    );
+  }
+  return (
+    <div className="max-w-7xl mx-auto px-4 pt-10 space-y-6">
+      <h1 className="text-3xl font-extrabold">Admin Verification Queue</h1>
+      <div className="bg-white p-6 rounded-3xl border border-slate-200 space-y-3">
+        {campaigns.map((c) => (
+          <div key={c.id} className="p-4 rounded-2xl border border-slate-200 flex justify-between items-center">
+            <div>
+              <TrustBadge verified={c.verified} score={c.trustScore} />
+              <p className="font-bold mt-1">{c.title}</p>
+            </div>
+            <button
+              onClick={() => {
+                updateCampaign(c.id, { verified: true, status: 'Active', trustScore: 95 });
+                showToast(`Verified "${c.title}"`);
+              }}
+              className="px-3.5 py-2 rounded-xl bg-[#16A34A] text-white text-xs font-bold"
+            >
+              Approve & Verify
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const ImpactWallPage = () => {
   const { campaigns, navigate } = useApp();
-  const [catFilter, setCatFilter] = useState('All');
-
-  const impactCampaigns = campaigns.filter(
-    (c) => catFilter === 'All' || c.category === catFilter
-  );
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#171923]">The FundBridge Impact Wall</h1>
-      </div>
-
-      <div className="flex flex-wrap justify-center gap-2 mb-8">
-        {['All', 'Medical', 'Education', 'Environment', 'Startup', 'Community Development', 'Animal Welfare'].map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setCatFilter(cat)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
-              catFilter === cat ? 'bg-[#635BFF] text-white' : 'bg-white border border-slate-200 text-slate-700'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {impactCampaigns.map((c) => (
-          <div key={c.id} className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col">
-            <div className="relative h-52">
-              <img src={c.image} alt={c.title} className="w-full h-full object-cover" />
-            </div>
+    <div className="max-w-7xl mx-auto px-4 pt-10 space-y-8">
+      <h1 className="text-3xl font-extrabold text-center">The FundBridge Impact Wall</h1>
+      <div className="grid md:grid-cols-3 gap-6">
+        {campaigns.map((c) => (
+          <div key={c.id} className="bg-white rounded-3xl border border-slate-200 overflow-hidden flex flex-col">
+            <img src={c.image} alt={c.title} className="h-48 w-full object-cover" />
             <div className="p-6 flex-1 flex flex-col">
-              <div className="flex justify-between items-center text-xs mb-2">
-                <span className="font-bold text-[#635BFF]">{c.category}</span>
-                <span className="font-bold text-[#16A34A]">{formatINR(c.raisedAmount)} Raised</span>
-              </div>
-              <h3 className="font-bold text-slate-900 text-lg mb-2">{c.title}</h3>
+              <h3 className="font-bold text-lg mb-2">{c.title}</h3>
               <p className="text-sm text-slate-600 flex-1 mb-4">{c.shortDescription}</p>
-              <button
-                onClick={() => navigate('campaign-details', { id: c.id })}
-                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-[#635BFF] text-white text-xs font-bold transition"
-              >
-                Inspect Full Impact & Receipts
+              <button onClick={() => navigate('campaign-details', { id: c.id })} className="w-full py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold">
+                Inspect Full Impact
               </button>
             </div>
           </div>
@@ -3511,38 +2798,20 @@ const ImpactWallPage = () => {
 
 const SuccessStoriesPage = () => {
   const { campaigns, navigate } = useApp();
-  const completed = campaigns.filter((c) => c.status === 'Completed' || calcPercentage(c.raisedAmount, c.targetAmount) >= 85);
-
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#171923]">Success Stories</h1>
-      </div>
-
-      <div className="space-y-8">
-        {completed.map((story) => (
-          <div key={story.id} className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm grid md:grid-cols-12">
-            <div className="md:col-span-5">
-              <img src={story.afterImage || story.image} alt={story.title} className="w-full h-full min-h-[240px] object-cover" />
-            </div>
-            <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-              <div>
-                <h2 className="text-2xl font-extrabold text-slate-900 mb-3">{story.title}</h2>
-                <p className="text-sm text-slate-600 leading-relaxed mb-4">{story.story}</p>
-              </div>
-              <div className="pt-5 mt-5 border-t border-slate-100 flex justify-between items-center">
-                <TrustBadge verified={story.verified} score={story.trustScore} />
-                <button
-                  onClick={() => navigate('campaign-details', { id: story.id })}
-                  className="px-4 py-2 rounded-xl bg-[#635BFF] text-white text-xs font-bold"
-                >
-                  View Expense Receipts
-                </button>
-              </div>
-            </div>
+    <div className="max-w-5xl mx-auto px-4 pt-10 space-y-6">
+      <h1 className="text-3xl font-extrabold text-center">Success Stories</h1>
+      {campaigns.map((story) => (
+        <div key={story.id} className="bg-white rounded-3xl border border-slate-200 p-6 flex justify-between items-center gap-4">
+          <div>
+            <h2 className="text-xl font-extrabold">{story.title}</h2>
+            <p className="text-sm text-slate-600 mt-1">{story.shortDescription}</p>
           </div>
-        ))}
-      </div>
+          <button onClick={() => navigate('campaign-details', { id: story.id })} className="px-4 py-2 rounded-xl bg-[#635BFF] text-white text-xs font-bold shrink-0">
+            View Receipts
+          </button>
+        </div>
+      ))}
     </div>
   );
 };
@@ -3550,154 +2819,49 @@ const SuccessStoriesPage = () => {
 const EmergencyFundingPage = () => {
   const { campaigns } = useApp();
   const [quickDonateCamp, setQuickDonateCamp] = useState(null);
-  const urgentCampaigns = campaigns.filter((c) => c.isEmergency || c.category === 'Emergency' || c.daysLeft <= 10);
-
+  const urgent = campaigns.filter((c) => c.isEmergency || c.category === 'Emergency' || c.daysLeft <= 10);
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
-      <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#EF4444] to-[#991B1B] text-white mb-10 shadow-lg">
-        <h1 className="text-3xl sm:text-4xl font-extrabold mb-2">Time-Sensitive Medical & Disaster Relief</h1>
+    <div className="max-w-7xl mx-auto px-4 pt-10 space-y-8">
+      <div className="p-8 rounded-3xl bg-gradient-to-r from-[#EF4444] to-[#991B1B] text-white">
+        <h1 className="text-3xl font-extrabold">Time-Sensitive Emergency Relief</h1>
       </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {urgentCampaigns.map((camp) => (
+      <div className="grid md:grid-cols-3 gap-6">
+        {urgent.map((camp) => (
           <CampaignCard key={camp.id} campaign={camp} onQuickDonate={setQuickDonateCamp} />
         ))}
       </div>
-
       <QuickDonationModal campaign={quickDonateCamp} onClose={() => setQuickDonateCamp(null)} />
     </div>
   );
 };
 
 const GroupFundingPage = () => {
-  const { groups, campaigns, createGroup, contributeToGroup } = useApp();
-  const [createOpen, setCreateOpen] = useState(false);
-  const [groupName, setGroupName] = useState('');
-  const [selectedCampId, setSelectedCampId] = useState(campaigns[0]?.id || 'camp_1');
-  const [targetAmt, setTargetAmt] = useState(50000);
-  const [memberNames, setMemberNames] = useState('Aarav Sharma, Priya Nair');
-  const [contribAmounts, setContribAmounts] = useState({});
-
-  const handleCreateGroup = async (e) => {
-    e.preventDefault();
-    const camp = campaigns.find((c) => c.id === selectedCampId);
-    const names = memberNames.split(',').map((n) => n.trim()).filter(Boolean);
-    if (!groupName || names.length === 0) return;
-
-    const perPerson = Math.round(Number(targetAmt) / names.length);
-    await createGroup({
-      name: groupName,
-      campaignId: selectedCampId,
-      campaignTitle: camp?.title || 'Verified Campaign',
-      targetAmount: Number(targetAmt),
-      description: `${names.length} friends pooling ${formatINR(perPerson)} each.`,
-      members: names.map((n, i) => ({
-        id: generateId(`gm_${i}`),
-        name: n,
-        pledged: perPerson,
-        contributed: i === 0 ? perPerson : 0,
-      })),
-    });
-    setGroupName('');
-    setCreateOpen(false);
-  };
-
+  const { groups, contributeToGroup } = useApp();
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-extrabold text-[#171923]">Group Giving Circles</h1>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="px-5 py-3 rounded-xl bg-[#635BFF] text-white text-sm font-bold flex items-center gap-2 shadow-md"
-        >
-          <Users className="w-4 h-4" /> Create a Funding Group
-        </button>
-      </div>
-
+    <div className="max-w-5xl mx-auto px-4 pt-10 space-y-6">
+      <h1 className="text-3xl font-extrabold">Group Giving Circles</h1>
       <div className="grid md:grid-cols-2 gap-6">
         {groups.map((grp) => {
-          const totalCollected = grp.members.reduce((sum, m) => sum + m.contributed, 0);
+          const collected = grp.members.reduce((s, m) => s + m.contributed, 0);
           return (
-            <div key={grp.id} className="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-5">
-              <div>
-                <h2 className="text-xl font-extrabold text-slate-900">{grp.name}</h2>
-                <p className="text-xs text-slate-500 mt-1">Supporting: <strong>{grp.campaignTitle}</strong></p>
-              </div>
-              <ProgressBar raised={totalCollected} target={grp.targetAmount} />
-              <div className="space-y-2.5">
-                {grp.members.map((m, idx) => {
-                  const mId = m._id || m.id || idx;
-                  return (
-                    <div key={mId} className="p-3 rounded-xl bg-[#F8F9FC] border border-slate-200/70 flex items-center justify-between gap-2">
-                      <div>
-                        <p className="text-sm font-bold text-slate-900">{m.name}</p>
-                        <p className="text-xs text-slate-500">Contributed: {formatINR(m.contributed)} / {formatINR(m.pledged)}</p>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="number"
-                          placeholder="₹"
-                          value={contribAmounts[mId] || ''}
-                          onChange={(e) => setContribAmounts({ ...contribAmounts, [mId]: e.target.value })}
-                          className="w-20 px-2 py-1.5 rounded-lg border border-slate-200 bg-white text-xs"
-                        />
-                        <button
-                          onClick={async () => {
-                            const amt = Number(contribAmounts[mId]) || Math.max(1000, m.pledged - m.contributed);
-                            await contributeToGroup(grp.id, mId, amt);
-                            setContribAmounts({ ...contribAmounts, [mId]: '' });
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-bold"
-                        >
-                          Add ₹
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div key={grp.id} className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4">
+              <h2 className="text-xl font-extrabold">{grp.name}</h2>
+              <ProgressBar raised={collected} target={grp.targetAmount} />
+              {grp.members.map((m, i) => (
+                <div key={m._id || m.id || i} className="flex justify-between items-center text-sm bg-slate-50 p-3 rounded-xl">
+                  <span>{m.name} ({formatINR(m.contributed)})</span>
+                  <button
+                    onClick={() => contributeToGroup(grp.id, m._id || m.id, 1000)}
+                    className="px-3 py-1 rounded-lg bg-slate-900 text-white text-xs font-bold"
+                  >
+                    + ₹1,000
+                  </button>
+                </div>
+              ))}
             </div>
           );
         })}
       </div>
-
-      <Modal isOpen={createOpen} onClose={() => setCreateOpen(false)} title="Create Shared Funding Group">
-        <form onSubmit={handleCreateGroup} className="space-y-4">
-          <input
-            type="text"
-            required
-            placeholder="Group Name"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-          />
-          <select
-            value={selectedCampId}
-            onChange={(e) => setSelectedCampId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm bg-white"
-          >
-            {campaigns.filter((c) => c.status !== 'Completed').map((c) => (
-              <option key={c.id} value={c.id}>{c.title}</option>
-            ))}
-          </select>
-          <input
-            type="number"
-            required
-            value={targetAmt}
-            onChange={(e) => setTargetAmt(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-          />
-          <textarea
-            rows={2}
-            value={memberNames}
-            onChange={(e) => setMemberNames(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-          />
-          <button type="submit" className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">
-            Launch Giving Group
-          </button>
-        </form>
-      </Modal>
     </div>
   );
 };
@@ -3705,34 +2869,28 @@ const GroupFundingPage = () => {
 const HowItWorksPage = () => {
   const { navigate } = useApp();
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 space-y-12">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-3xl sm:text-4xl font-extrabold text-[#171923]">How FundBridge Protects Every Rupee</h1>
+    <div className="max-w-4xl mx-auto px-4 pt-10 space-y-8 text-center">
+      <h1 className="text-3xl font-extrabold">How FundBridge Protects Every Rupee</h1>
+      <div className="grid md:grid-cols-3 gap-6 text-left">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200">
+          <h3 className="font-bold mb-2">1. Trust Score (0–100)</h3>
+          <p className="text-sm text-slate-600">Evaluates creator identity and supporting estimates.</p>
+        </div>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200">
+          <h3 className="font-bold mb-2">2. Receipt Ledger</h3>
+          <p className="text-sm text-slate-600">Itemized vendor receipts uploaded publicly.</p>
+        </div>
+        <div className="bg-white p-6 rounded-3xl border border-slate-200">
+          <h3 className="font-bold mb-2">3. FundBridge Pay</h3>
+          <p className="text-sm text-slate-600">Instant verified transaction receipts via UPI, Card, or Net Banking.</p>
+        </div>
       </div>
-      <div className="grid md:grid-cols-3 gap-6">
-        {[
-          { title: '1. Trust Score (0â€“100)', desc: 'Evaluates creator identity, supporting estimates, and escrow readiness.' },
-          { title: '2. Itemized Receipt Ledger', desc: 'Creators upload vendor invoices directly to the public Fund Utilization Tracker.' },
-          { title: '3. Milestone-Gated Execution', desc: 'Goals are divided into sequential milestones so supporters track progress.' },
-        ].map((card, i) => (
-          <div key={i} className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm">
-            <h3 className="font-extrabold text-slate-900 text-lg mb-2">{card.title}</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">{card.desc}</p>
-          </div>
-        ))}
-      </div>
-      <div className="text-center">
-        <button onClick={() => navigate('explore')} className="px-6 py-3.5 rounded-xl bg-[#635BFF] text-white font-bold text-sm">
-          Explore Verified Campaigns
-        </button>
-      </div>
+      <button onClick={() => navigate('explore')} className="px-6 py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">
+        Explore Verified Campaigns
+      </button>
     </div>
   );
 };
-
-// ============================================================================
-// 14. AUTHENTICATION & USER PROFILE PAGES
-// ============================================================================
 
 const AuthPages = ({ mode = 'login' }) => {
   const { loginUser, signupUser, navigate, switchDemoRole, showToast } = useApp();
@@ -3743,277 +2901,93 @@ const AuthPages = ({ mode = 'login' }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('donor');
   const [showPass, setShowPass] = useState(false);
-  const [resetSent, setResetSent] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      if (mode === 'login') {
-        await loginUser(email, password);
-      } else if (mode === 'signup') {
-        if (password !== confirmPassword) {
-          showToast('Passwords do not match!', 'error');
-          return;
-        }
-        await signupUser({ name, email, phone, password, role });
-      } else if (mode === 'forgot') {
-        setResetSent(true);
-        showToast('Password reset instructions sent!');
+    if (mode === 'login') await loginUser(email, password);
+    else if (mode === 'signup') {
+      if (password !== confirmPassword) {
+        showToast('Passwords do not match!', 'error');
+        return;
       }
-    } finally {
-      setSubmitting(false);
+      await signupUser({ name, email, phone, password, role });
     }
   };
 
   return (
     <div className="max-w-md mx-auto px-4 pt-12">
-      <div className="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-xl space-y-6">
-        <div className="text-center">
-          <div className="w-11 h-11 rounded-2xl bg-[#635BFF] text-white flex items-center justify-center mx-auto mb-3">
-            <HandHeart className="w-6 h-6" />
-          </div>
-          <h1 className="text-2xl font-extrabold text-slate-900">
-            {mode === 'login' ? 'Welcome Back' : mode === 'signup' ? 'Create Your Account' : 'Reset Password'}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">Secured with JWT & MongoDB Atlas</p>
+      <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-xl space-y-5">
+        <h1 className="text-2xl font-extrabold text-center">
+          {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+        </h1>
+        <div className="grid grid-cols-3 gap-2">
+          {['donor', 'creator', 'admin'].map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => {
+                switchDemoRole(r);
+                navigate('home');
+              }}
+              className="py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold capitalize"
+            >
+              Demo {r}
+            </button>
+          ))}
         </div>
-
-        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-          <p className="text-[11px] font-bold uppercase text-slate-400 mb-2 text-center">Instant 1-Click Demo Profiles</p>
-          <div className="grid grid-cols-3 gap-2">
-            {['donor', 'creator', 'admin'].map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => {
-                  switchDemoRole(r);
-                  navigate(r === 'creator' ? 'creator-dashboard' : r === 'admin' ? 'admin-dashboard' : 'donor-dashboard');
-                }}
-                className="py-2 rounded-xl bg-white border border-slate-200 hover:border-[#635BFF] text-xs font-bold capitalize text-slate-800"
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           {mode === 'signup' && (
             <>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Full Name *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Rohan Kumar"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number *</label>
-                <input
-                  type="tel"
-                  required
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">I want to join as</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'donor', label: 'Donor / Supporter' },
-                    { id: 'creator', label: 'Campaign Creator' },
-                  ].map((r) => (
-                    <button
-                      type="button"
-                      key={r.id}
-                      onClick={() => setRole(r.id)}
-                      className={`py-2.5 rounded-xl text-xs font-bold border ${
-                        role === r.id ? 'bg-[#635BFF] text-white border-[#635BFF]' : 'bg-white text-slate-700 border-slate-200'
-                      }`}
-                    >
-                      {r.label}
-                    </button>
-                  ))}
-                </div>
+              <input type="text" required placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+              <div className="grid grid-cols-2 gap-2">
+                {['donor', 'creator'].map((r) => (
+                  <button key={r} type="button" onClick={() => setRole(r)} className={`py-2 rounded-xl text-xs font-bold capitalize border ${role === r ? 'bg-[#635BFF] text-white' : 'bg-white'}`}>
+                    {r}
+                  </button>
+                ))}
               </div>
             </>
           )}
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Email Address *</label>
-            <input
-              type="email"
-              required
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-            />
+          <input type="email" required placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
+          <div className="relative">
+            <input type={showPass ? 'text' : 'password'} required placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm pr-10" />
+            <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-2.5 text-slate-400">
+              {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
-
-          {mode !== 'forgot' && (
-            <div>
-              <div className="flex justify-between mb-1">
-                <label className="text-xs font-bold text-slate-700">Password *</label>
-                {mode === 'login' && (
-                  <button type="button" onClick={() => navigate('forgot')} className="text-xs text-[#635BFF] font-semibold">
-                    Forgot password?
-                  </button>
-                )}
-              </div>
-              <div className="relative">
-                <input
-                  type={showPass ? 'text' : 'password'}
-                  required
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPass(!showPass)}
-                  className="absolute right-3 top-2.5 text-slate-400"
-                >
-                  {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-          )}
-
           {mode === 'signup' && (
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Password *</label>
-              <input
-                type={showPass ? 'text' : 'password'}
-                required
-                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm"
-              />
-            </div>
+            <input type="password" required placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm" />
           )}
-
-          {resetSent && mode === 'forgot' && (
-            <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
-              Password reset link sent to <strong>{email}</strong>.
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full py-3 rounded-xl bg-[#635BFF] hover:bg-[#5249F5] text-white font-bold text-sm shadow-md disabled:opacity-60"
-          >
-            {submitting
-              ? 'Please wait...'
-              : mode === 'login'
-              ? 'Sign In'
-              : mode === 'signup'
-              ? 'Create Account'
-              : 'Send Reset Link'}
+          <button type="submit" className="w-full py-3 rounded-xl bg-[#635BFF] text-white font-bold text-sm">
+            {mode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
         </form>
-
-        <div className="text-center text-xs text-slate-500">
+        <p className="text-center text-xs text-slate-500">
           {mode === 'login' ? (
-            <>
-              Donâ€™t have an account?{' '}
-              <button onClick={() => navigate('signup')} className="text-[#635BFF] font-bold hover:underline">
-                Sign Up
-              </button>
-            </>
+            <button onClick={() => navigate('signup')} className="text-[#635BFF] font-bold">Need an account? Sign Up</button>
           ) : (
-            <>
-              Already have an account?{' '}
-              <button onClick={() => navigate('login')} className="text-[#635BFF] font-bold hover:underline">
-                Log In
-              </button>
-            </>
+            <button onClick={() => navigate('login')} className="text-[#635BFF] font-bold">Already have an account? Log In</button>
           )}
-        </div>
+        </p>
       </div>
     </div>
   );
 };
 
 const ProfilePage = () => {
-  const { currentUser, switchDemoRole, showToast } = useApp();
-  const [selectedInterests, setSelectedInterests] = useState(currentUser?.interests || ['Education', 'Medical']);
-
+  const { currentUser, switchDemoRole } = useApp();
   if (!currentUser) return null;
-
-  const toggleInterest = (cat) => {
-    setSelectedInterests((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    );
-  };
-
   return (
-    <div className="max-w-3xl mx-auto px-4 pt-10">
-      <div className="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#635BFF] text-white text-xl font-black flex items-center justify-center">
-            {currentUser.avatar}
-          </div>
-          <div>
-            <h1 className="text-2xl font-extrabold text-slate-900">{currentUser.name}</h1>
-            <p className="text-sm text-slate-500">{currentUser.email} â€¢ {currentUser.phone}</p>
-            <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase bg-indigo-50 text-[#635BFF]">
-              Active Role: {currentUser.role}
-            </span>
-          </div>
-        </div>
-
-        <div className="pt-4 border-t border-slate-100">
-          <h3 className="text-sm font-bold text-slate-900 mb-2">Smart Recommendation Interests</h3>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((c) => {
-              const active = selectedInterests.includes(c.id);
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => toggleInterest(c.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
-                    active ? 'bg-[#635BFF] text-white border-[#635BFF]' : 'bg-slate-50 text-slate-600 border-slate-200'
-                  }`}
-                >
-                  {c.label}
-                </button>
-              );
-            })}
-          </div>
-          <button
-            onClick={() => showToast('Impact preferences saved!')}
-            className="mt-4 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold"
-          >
-            Save Preferences
-          </button>
-        </div>
-
-        <div className="pt-4 border-t border-slate-100">
-          <h3 className="text-sm font-bold text-slate-900 mb-2">Switch Demo Role</h3>
-          <div className="flex gap-2">
-            {['donor', 'creator', 'admin'].map((r) => (
-              <button
-                key={r}
-                onClick={() => switchDemoRole(r)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold capitalize border ${
-                  currentUser.role === r ? 'bg-[#635BFF] text-white border-[#635BFF]' : 'bg-white border-slate-200'
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
+    <div className="max-w-2xl mx-auto px-4 pt-10">
+      <div className="bg-white rounded-3xl border border-slate-200 p-8 space-y-4">
+        <h1 className="text-2xl font-extrabold">{currentUser.name}</h1>
+        <p className="text-sm text-slate-500">{currentUser.email} • Role: {currentUser.role}</p>
+        <div className="flex gap-2 pt-2">
+          {['donor', 'creator', 'admin'].map((r) => (
+            <button key={r} onClick={() => switchDemoRole(r)} className="px-4 py-2 rounded-xl border text-xs font-bold capitalize">
+              Switch to {r}
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -4021,7 +2995,7 @@ const ProfilePage = () => {
 };
 
 // ============================================================================
-// 15. MAIN APPLICATION SHELL
+// 12. MAIN APPLICATION SHELL
 // ============================================================================
 
 const MainRouter = () => {
@@ -4029,58 +3003,37 @@ const MainRouter = () => {
 
   const renderPage = () => {
     switch (route.page) {
-      case 'home':
-        return <HomePage />;
-      case 'explore':
-        return <ExplorePage />;
-      case 'campaign-details':
-        return <CampaignDetailsPage />;
-      case 'ai-writer':
-        return <AIWriterPage />;
-      case 'create-campaign':
-        return <CreateCampaignPage />;
-      case 'donor-dashboard':
-        return <DonorDashboardPage />;
-      case 'creator-dashboard':
-        return <CreatorDashboardPage />;
-      case 'admin-dashboard':
-        return <AdminDashboardPage />;
-      case 'impact':
-        return <ImpactWallPage />;
-      case 'stories':
-        return <SuccessStoriesPage />;
-      case 'emergency':
-        return <EmergencyFundingPage />;
-      case 'groups':
-        return <GroupFundingPage />;
-      case 'how-it-works':
-        return <HowItWorksPage />;
-      case 'login':
-        return <AuthPages mode="login" />;
-      case 'signup':
-        return <AuthPages mode="signup" />;
-      case 'forgot':
-        return <AuthPages mode="forgot" />;
-      case 'profile':
-        return <ProfilePage />;
-      default:
-        return <HomePage />;
+      case 'home': return <HomePage />;
+      case 'explore': return <ExplorePage />;
+      case 'campaign-details': return <CampaignDetailsPage />;
+      case 'ai-writer': return <AIWriterPage />;
+      case 'create-campaign': return <CreateCampaignPage />;
+      case 'donor-dashboard': return <DonorDashboardPage />;
+      case 'creator-dashboard': return <CreatorDashboardPage />;
+      case 'admin-dashboard': return <AdminDashboardPage />;
+      case 'impact': return <ImpactWallPage />;
+      case 'stories': return <SuccessStoriesPage />;
+      case 'emergency': return <EmergencyFundingPage />;
+      case 'groups': return <GroupFundingPage />;
+      case 'how-it-works': return <HowItWorksPage />;
+      case 'login': return <AuthPages mode="login" />;
+      case 'signup': return <AuthPages mode="signup" />;
+      case 'forgot': return <AuthPages mode="forgot" />;
+      case 'profile': return <ProfilePage />;
+      default: return <HomePage />;
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FC] text-[#171923] font-sans selection:bg-[#635BFF] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-[#F8F9FC] text-[#171923] font-sans">
       <Navbar />
-
       {toast && (
-        <div className="fixed bottom-5 right-5 z-50 max-w-sm bg-[#171923] text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3 animate-bounce">
+        <div className="fixed bottom-5 right-5 z-50 max-w-sm bg-[#171923] text-white px-4 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-[#16A34A] shrink-0" />
           <p className="text-xs sm:text-sm font-semibold">{toast.message}</p>
         </div>
       )}
-
       <main className="flex-1 pb-12">{renderPage()}</main>
-
       <Footer />
     </div>
   );
